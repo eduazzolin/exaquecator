@@ -9,25 +9,36 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'apple-touch-icon.png'],
+      includeAssets: ['favicon.svg', 'favicon-32x32.png', 'apple-touch-icon.png', 'pwa-192x192.png', 'pwa-512x512.png'],
       manifest: {
         name: 'Enxaquecator - Diário de Enxaqueca',
         short_name: 'Enxaquecator',
         description: 'Registre, monitore e analise suas crises de enxaqueca e uso de medicamentos',
-        theme_color: '#0f172a',
-        background_color: '#090d16',
+        start_url: '/',
+        scope: '/',
+        theme_color: '#09090b',
+        background_color: '#09090b',
         display: 'standalone',
-        orientation: 'portrait',
+        display_override: ['standalone', 'window-controls-overlay'],
+        orientation: 'portrait-primary',
         icons: [
           {
             src: 'pwa-192x192.png',
             sizes: '192x192',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
           },
           {
             src: 'pwa-512x512.png',
             sizes: '512x512',
-            type: 'image/png'
+            type: 'image/png',
+            purpose: 'any'
+          },
+          {
+            src: 'pwa-512x512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       }
