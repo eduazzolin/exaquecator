@@ -19,6 +19,11 @@ export const App: React.FC = () => {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
+  const handleEditInForm = (date: string) => {
+    setSelectedDate(date);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-[#090b10] text-slate-100 flex flex-col pb-20 sm:pb-10">
       
@@ -36,7 +41,7 @@ export const App: React.FC = () => {
       {/* Main Container */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-5 flex-1 w-full space-y-6">
         
-        {/* VIEW 1: DIÁRIO (FORMULÁRIO NO TOPO + CALENDÁRIO ABAIXO) */}
+        {/* VIEW 1: DIÁRIO (FORMULÁRIO NO TOPO + CALENDÁRIO COM DETALHES ABAIXO) */}
         {activeTab === 'timeline' && (
           <div className="space-y-6 animate-in fade-in">
             
@@ -46,11 +51,12 @@ export const App: React.FC = () => {
               onDateChange={setSelectedDate}
             />
 
-            {/* 2. Calendário Interativo logo abaixo */}
+            {/* 2. Calendário Interativo com Detalhes logo abaixo */}
             <CalendarView
               crises={crises}
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
+              onEditInForm={handleEditInForm}
             />
 
           </div>
