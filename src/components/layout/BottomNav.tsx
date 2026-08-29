@@ -11,23 +11,27 @@ export const BottomNav: React.FC<BottomNavProps> = ({
   setActiveTab
 }) => {
   return (
-    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-slate-950/95 backdrop-blur-lg border-t border-slate-800/90 px-4 py-2">
+    <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[var(--card-bg)]/95 backdrop-blur-lg border-t border-[var(--card-border)] px-4 py-2">
       <div className="flex items-center justify-around">
         
         <button
           onClick={() => setActiveTab('timeline')}
-          className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all ${
-            activeTab === 'timeline' ? 'text-violet-400 font-bold' : 'text-slate-500'
+          className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all ${
+            activeTab === 'timeline' 
+              ? 'text-[var(--text-primary)] font-semibold' 
+              : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
           }`}
         >
           <BookOpen className="w-5 h-5" />
-          <span className="text-[10px]">Diário & Calendário</span>
+          <span className="text-[10px]">Diário</span>
         </button>
 
         <button
           onClick={() => setActiveTab('analytics')}
-          className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all ${
-            activeTab === 'analytics' ? 'text-violet-400 font-bold' : 'text-slate-500'
+          className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all ${
+            activeTab === 'analytics' 
+              ? 'text-[var(--text-primary)] font-semibold' 
+              : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
           }`}
         >
           <BarChart2 className="w-5 h-5" />
@@ -36,8 +40,10 @@ export const BottomNav: React.FC<BottomNavProps> = ({
 
         <button
           onClick={() => setActiveTab('medications')}
-          className={`flex flex-col items-center gap-1 p-1.5 rounded-xl transition-all ${
-            activeTab === 'medications' ? 'text-violet-400 font-bold' : 'text-slate-500'
+          className={`flex flex-col items-center gap-1 p-1.5 rounded-lg transition-all ${
+            activeTab === 'medications' 
+              ? 'text-[var(--text-primary)] font-semibold' 
+              : 'text-[var(--text-muted)] hover:text-[var(--text-secondary)]'
           }`}
         >
           <Pill className="w-5 h-5" />

@@ -45,11 +45,11 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
-        <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+        <label className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)]">
           {label}
         </label>
         {selected.length > 0 && (
-          <span className="text-xs text-brand-400 font-medium">
+          <span className="text-xs text-[var(--text-secondary)] font-medium">
             {selected.length} selecionado{selected.length > 1 ? 's' : ''}
           </span>
         )}
@@ -63,14 +63,14 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               key={option}
               type="button"
               onClick={() => toggleOption(option)}
-              className={`text-xs sm:text-sm px-3 py-1.5 rounded-xl border transition-all duration-150 flex items-center gap-1.5 ${
+              className={`text-xs sm:text-sm px-3 py-1.5 rounded-md border transition-all duration-150 flex items-center gap-1.5 ${
                 isSelected
-                  ? 'bg-brand-600/25 border-brand-500/60 text-brand-200 font-medium shadow-sm shadow-brand-500/10'
-                  : 'bg-slate-900/60 border-slate-800 text-slate-300 hover:bg-slate-800/80 hover:text-slate-100 hover:border-slate-700'
+                  ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] font-medium shadow-sm'
+                  : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)]'
               }`}
             >
               {isSelected ? (
-                <Check className="w-3.5 h-3.5 text-brand-400 flex-shrink-0" />
+                <Check className="w-3.5 h-3.5 flex-shrink-0" />
               ) : null}
               <span>{option}</span>
             </button>
@@ -87,19 +87,19 @@ export const TagPicker: React.FC<TagPickerProps> = ({
                   onChange={e => setCustomInput(e.target.value)}
                   placeholder={placeholderCustom}
                   autoFocus
-                  className="text-xs sm:text-sm px-3 py-1.5 rounded-xl bg-slate-800 border border-brand-500 text-slate-100 placeholder-slate-500 outline-none w-36 sm:w-44"
+                  className="text-xs sm:text-sm px-3 py-1.5 rounded-md bg-[var(--card-bg)] border border-[var(--card-border-hover)] text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none w-36 sm:w-44"
                 />
                 <button
                   type="button"
                   onClick={() => handleAddCustom()}
-                  className="p-1.5 rounded-lg bg-brand-600 hover:bg-brand-500 text-white transition-colors"
+                  className="p-1.5 rounded-md bg-[var(--color-primary)] hover:opacity-90 text-[var(--bg-primary)] transition-colors"
                 >
                   <Check className="w-3.5 h-3.5" />
                 </button>
                 <button
                   type="button"
                   onClick={() => { setIsAdding(false); setCustomInput(''); }}
-                  className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 transition-colors"
+                  className="p-1.5 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] transition-colors"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -108,7 +108,7 @@ export const TagPicker: React.FC<TagPickerProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAdding(true)}
-                className="text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-dashed border-slate-700 text-slate-400 hover:text-brand-300 hover:border-brand-500/50 hover:bg-brand-950/20 transition-all flex items-center gap-1"
+                className="text-xs sm:text-sm px-3 py-1.5 rounded-md border border-dashed border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)] transition-all flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Personalizado</span>

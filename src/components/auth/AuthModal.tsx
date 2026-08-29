@@ -71,62 +71,62 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in">
-      <div className="bg-slate-950 border border-slate-800 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden text-slate-100 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in">
+      <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl w-full max-w-md shadow-2xl overflow-hidden text-[var(--text-primary)] flex flex-col">
         
         {/* Header */}
-        <div className="p-5 sm:p-6 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 sm:p-5 bg-[var(--bg-secondary)] border-b border-[var(--card-border)] flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-brand-500/20 border border-brand-500/30 flex items-center justify-center text-brand-400">
-              <KeyRound className="w-5 h-5" />
+            <div className="w-8 h-8 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center text-[var(--text-secondary)]">
+              <KeyRound className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-white">
-                {user ? 'Minha Conta & Nuvem' : 'Entrar no Enxaquecator'}
+              <h2 className="text-base font-semibold text-[var(--text-primary)]">
+                {user ? 'Minha Conta' : 'Entrar no Enxaquecator'}
               </h2>
-              <p className="text-xs text-slate-400">
-                {isFirebaseActive ? 'Sincronização Firebase Ativa' : 'Modo Demonstração / Local'}
+              <p className="text-[11px] text-[var(--text-muted)]">
+                {isFirebaseActive ? 'Sincronização em Nuvem Ativa' : 'Modo Demonstração / Local'}
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800"
+            className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
         {/* Content */}
-        <div className="p-5 sm:p-6 space-y-5">
+        <div className="p-5 sm:p-6 space-y-4">
           
           {user ? (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-brand-600/30 border border-brand-500/40 flex items-center justify-center text-brand-300 font-bold text-lg">
+              <div className="p-4 rounded-lg bg-[var(--bg-secondary)] border border-[var(--card-border)] flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-center text-[var(--text-primary)] font-bold text-base">
                   {user.displayName?.[0]?.toUpperCase() || 'U'}
                 </div>
                 <div className="truncate flex-1">
-                  <p className="font-bold text-white truncate">{user.displayName}</p>
-                  <p className="text-xs text-slate-400 truncate">{user.email || 'Conta Anônima / Local'}</p>
-                  <span className="inline-block mt-1 text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800">
-                    Sessão Conectada
+                  <p className="font-semibold text-sm text-[var(--text-primary)] truncate">{user.displayName || 'Usuário'}</p>
+                  <p className="text-xs text-[var(--text-muted)] truncate">{user.email || 'Conta Anônima / Local'}</p>
+                  <span className="badge bg-[rgba(16,185,129,0.1)] text-[var(--color-above)] border border-[rgba(16,185,129,0.2)] mt-1">
+                    Conectado
                   </span>
                 </div>
               </div>
 
               {!isFirebaseActive && (
-                <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400 space-y-1">
-                  <p className="font-bold text-brand-300">ℹ️ Modo Demonstração / Local:</p>
-                  <p>Seus dados estão sendo salvos com segurança no cache local do seu navegador. Para conectar ao seu Firebase em produção, preencha o arquivo <code className="text-brand-400">.env</code> com as chaves do Firebase Console.</p>
+                <div className="p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-xs text-[var(--text-secondary)] space-y-1">
+                  <p className="font-semibold text-[var(--text-primary)]">ℹ️ Modo Local / Offline:</p>
+                  <p>Seus dados estão sendo salvos com segurança no cache local do seu dispositivo.</p>
                 </div>
               )}
 
               <button
                 onClick={handleLogout}
-                className="w-full py-2.5 rounded-xl border border-rose-500/40 bg-rose-950/20 hover:bg-rose-950/40 text-rose-300 text-xs font-bold transition-colors"
+                className="w-full btn btn-danger text-xs py-2"
               >
-                Encerrar Sessão / Trocar Usuário
+                Encerrar Sessão / Desconectar
               </button>
             </div>
           ) : (
@@ -136,9 +136,9 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
               <button
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm transition-all flex items-center justify-center gap-3 shadow-md disabled:opacity-50"
+                className="w-full py-2.5 px-4 rounded-md bg-[var(--card-bg)] hover:bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)] font-medium text-xs sm:text-sm transition-all flex items-center justify-center gap-2.5 shadow-sm disabled:opacity-50"
               >
-                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                   <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                   <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
@@ -147,21 +147,21 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                 <span>Continuar com Google</span>
               </button>
 
-              <div className="flex items-center gap-3 my-3">
-                <div className="h-px bg-slate-800 flex-1" />
-                <span className="text-[11px] uppercase tracking-wider text-slate-500 font-semibold">ou com e-mail</span>
-                <div className="h-px bg-slate-800 flex-1" />
+              <div className="flex items-center gap-3 my-2">
+                <div className="h-px bg-[var(--card-border)] flex-1" />
+                <span className="text-[10px] uppercase tracking-wider text-[var(--text-muted)] font-semibold">ou com e-mail</span>
+                <div className="h-px bg-[var(--card-border)] flex-1" />
               </div>
 
               {errorMsg && (
-                <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-xs text-rose-300">
+                <div className="p-2.5 rounded-md bg-rose-500/10 border border-rose-500/20 text-xs text-[var(--color-below)]">
                   {errorMsg}
                 </div>
               )}
 
               <form onSubmit={handleEmailAuth} className="space-y-3">
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div>
+                  <label className="form-label">
                     E-mail
                   </label>
                   <input
@@ -170,12 +170,12 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="seu@email.com"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:border-brand-500 outline-none"
+                    className="input-field text-xs"
                   />
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <div>
+                  <label className="form-label">
                     Senha
                   </label>
                   <input
@@ -185,30 +185,30 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:border-brand-500 outline-none"
+                    className="input-field text-xs"
                   />
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full py-3 rounded-xl bg-brand-600 hover:bg-brand-500 text-white font-bold text-sm shadow-md transition-all disabled:opacity-50"
+                  className="w-full btn btn-primary text-xs py-2.5 shadow-sm"
                 >
-                  {mode === 'login' ? 'Entrar com E-mail' : 'Criar Nova Conta'}
+                  {mode === 'login' ? 'Entrar' : 'Criar Nova Conta'}
                 </button>
               </form>
 
               <div className="flex items-center justify-between pt-2 text-xs">
                 <button
                   onClick={() => setMode(mode === 'login' ? 'signup' : 'login')}
-                  className="text-brand-400 hover:text-brand-300 font-semibold"
+                  className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] font-medium text-[11px]"
                 >
-                  {mode === 'login' ? 'Não tem conta? Cadastre-se' : 'Já possui conta? Faça login'}
+                  {mode === 'login' ? 'Criar uma conta' : 'Já tenho uma conta'}
                 </button>
 
                 <button
                   onClick={handleGuestLogin}
-                  className="text-slate-400 hover:text-slate-200"
+                  className="text-[var(--text-muted)] hover:text-[var(--text-primary)] text-[11px]"
                 >
                   Entrar como Anônimo
                 </button>

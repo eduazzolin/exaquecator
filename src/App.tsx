@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useData } from './context/DataContext';
 import { Navbar } from './components/layout/Navbar';
 import { BottomNav } from './components/layout/BottomNav';
@@ -19,13 +19,42 @@ export const App: React.FC = () => {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
+  // Theme state (inspired by budgeter)
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark' || saved === 'light') return saved;
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
+    return 'dark'; // default to dark for formal feel
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+
+    // Update theme-color meta tags
+    const themeColor = theme === 'dark' ? '#09090b' : '#fafafa';
+    const metaTags = document.querySelectorAll('meta[name="theme-color"]');
+    if (metaTags.length > 0) {
+      metaTags.forEach(meta => meta.setAttribute('content', themeColor));
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   const handleEditInForm = (date: string) => {
     setSelectedDate(date);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <div className="min-h-screen bg-[#090b10] text-slate-100 flex flex-col pb-20 sm:pb-10">
+    <div className="min-h-screen flex flex-col pb-24 sm:pb-12 transition-colors duration-200">
       
       {/* Toast Notifications */}
       <ToastContainer />
@@ -34,24 +63,26 @@ export const App: React.FC = () => {
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        theme={theme}
+        onToggleTheme={toggleTheme}
         onOpenExport={() => setIsExportOpen(true)}
         onOpenAuth={() => setIsAuthOpen(true)}
       />
 
       {/* Main Container */}
-      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-5 flex-1 w-full space-y-6">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 flex-1 w-full space-y-6">
         
         {/* VIEW 1: DIÁRIO (FORMULÁRIO NO TOPO + CALENDÁRIO COM DETALHES ABAIXO) */}
         {activeTab === 'timeline' && (
-          <div className="space-y-6 animate-in fade-in">
+          <div className="space-y-6 animate-in">
             
-            {/* 1. Formulário Completo no Topo */}
+            {/* 1. Formulário Minimalista */}
             <CrisisForm
               selectedDate={selectedDate}
               onDateChange={setSelectedDate}
             />
 
-            {/* 2. Calendário Interativo com Detalhes logo abaixo */}
+            {/* 2. Calendário Interativo Minimalista */}
             <CalendarView
               crises={crises}
               selectedDate={selectedDate}
@@ -64,14 +95,19 @@ export const App: React.FC = () => {
 
         {/* VIEW 2: ESTATÍSTICAS */}
         {activeTab === 'analytics' && (
-          <AnalyticsDashboard
-            crises={crises}
-          />
+          <div className="animate-in">
+            <AnalyticsDashboard
+              crises={crises}
+              theme={theme}
+            />
+          </div>
         )}
 
         {/* VIEW 3: MEDICAMENTOS */}
         {activeTab === 'medications' && (
-          <MedicationManager />
+          <div className="animate-in">
+            <MedicationManager />
+          </div>
         )}
 
       </main>

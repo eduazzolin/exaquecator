@@ -12,29 +12,23 @@ export const IntensityBadge: React.FC<IntensityBadgeProps> = ({
   showLabel = false, 
   size = 'md' 
 }) => {
-  if (level === null || level === undefined) {
-    const sizeClasses = {
-      sm: 'px-2 py-0.5 text-xs',
-      md: 'px-2.5 py-1 text-sm',
-      lg: 'px-3.5 py-1.5 text-base font-semibold'
-    };
+  const sizeClasses = {
+    sm: 'px-2 py-0.5 text-xs',
+    md: 'px-2.5 py-0.5 text-xs font-semibold',
+    lg: 'px-3 py-1 text-sm font-semibold'
+  };
 
+  if (level === null || level === undefined) {
     return (
       <span
-        className={`inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800/80 text-slate-400 font-medium ${sizeClasses[size]}`}
+        className={`inline-flex items-center gap-1.5 rounded-full border border-[var(--card-border)] bg-[var(--bg-secondary)] text-[var(--text-muted)] font-medium ${sizeClasses[size]}`}
       >
-        <span>Dor não informada</span>
+        <span>Sem dor</span>
       </span>
     );
   }
 
   const colorInfo = getIntensityColor(level);
-
-  const sizeClasses = {
-    sm: 'px-2 py-0.5 text-xs',
-    md: 'px-2.5 py-1 text-sm',
-    lg: 'px-3.5 py-1.5 text-base font-semibold'
-  };
 
   return (
     <span

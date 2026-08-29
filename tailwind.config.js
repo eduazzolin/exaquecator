@@ -31,6 +31,14 @@ export default {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+      },
+      borderRadius: {
+        'sm': '6px',
+        'md': '10px',
+        'lg': '14px',
+        'xl': '18px',
+        '2xl': '22px',
       }
     },
   },

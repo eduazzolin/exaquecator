@@ -171,40 +171,38 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   const currentColor = intensity !== null ? getIntensityColor(intensity) : null;
 
   return (
-    <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
+    <div className="glass p-4 sm:p-6 space-y-5">
       
       {/* Top Header: Mini Calendar Picker, Start Time & Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
-        <div className="flex flex-wrap items-center gap-3 sm:gap-5">
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--card-border)]">
+        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+          <div>
+            <label className="form-label">
               Data do Registro
             </label>
-            <div>
-              <MiniDatePicker
-                value={selectedDate}
-                onChange={onDateChange}
-              />
-            </div>
+            <MiniDatePicker
+              value={selectedDate}
+              onChange={onDateChange}
+            />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-              <Clock className="w-3 h-3 text-violet-400" />
-              Hora de Início <span className="text-slate-500 font-normal lowercase">(opcional)</span>
+          <div>
+            <label className="form-label flex items-center gap-1">
+              <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
+              Hora de Início <span className="text-[var(--text-muted)] font-normal lowercase">(opcional)</span>
             </label>
             <div className="flex items-center gap-1.5">
               <input
                 type="time"
                 value={startTime}
                 onChange={e => setStartTime(e.target.value)}
-                className="px-2.5 py-1.5 h-[38px] rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none focus:border-violet-500 transition-colors [color-scheme:dark]"
+                className="px-2.5 py-1.5 h-[34px] rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--card-border-hover)] transition-colors"
               />
               {startTime && (
                 <button
                   type="button"
                   onClick={() => setStartTime('')}
-                  className="p-1 rounded-lg text-slate-500 hover:text-slate-300 transition-colors"
+                  className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
                   title="Limpar horário"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -216,11 +214,11 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
 
         <div>
           {existingCrisis ? (
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 flex items-center gap-1.5 self-start sm:self-auto">
-              <Check className="w-3.5 h-3.5" /> Dia Registrado (Modo Edição)
+            <span className="badge bg-[rgba(16,185,129,0.1)] text-[var(--color-above)] border border-[rgba(16,185,129,0.2)]">
+              <Check className="w-3 h-3" /> Dia Registrado (Edição)
             </span>
           ) : (
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-[var(--text-muted)]">
               Nenhum registro salvo neste dia
             </span>
           )}
@@ -228,19 +226,19 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
       </div>
 
       {/* Main Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         
         {/* 1. TIPO (Presença, Dor, Aura) */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <label className="form-label mb-0">
               Tipo do Episódio
             </label>
             {type && (
               <button
                 type="button"
                 onClick={() => setType(null)}
-                className="text-[11px] text-slate-500 hover:text-slate-300"
+                className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
                 (Limpar)
               </button>
@@ -251,7 +249,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             {[
               { id: 'presenca' as CrisisType, label: 'Presença', emoji: '🌫️', desc: 'Sensação / Pródromo' },
               { id: 'dor' as CrisisType, label: 'Dor', emoji: '💥', desc: 'Cefaleia / Enxaqueca' },
-              { id: 'aura' as CrisisType, label: 'Aura', emoji: '✨', desc: 'Alteração visual / sensorial' }
+              { id: 'aura' as CrisisType, label: 'Aura', emoji: '✨', desc: 'Visual / Sensorial' }
             ].map(opt => {
               const isSelected = type === opt.id;
               return (
@@ -259,21 +257,21 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   key={opt.id}
                   type="button"
                   onClick={() => handleTypeClick(opt.id)}
-                  className={`p-2.5 rounded-xl border text-left transition-all flex flex-col justify-between ${
+                  className={`p-3 rounded-md border text-left transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-violet-600/30 border-violet-500 text-white shadow-md ring-2 ring-violet-500/50'
-                      : 'bg-slate-950/80 border-slate-800 text-slate-400 hover:bg-slate-850 hover:text-slate-200'
+                      ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] shadow-sm'
+                      : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)]'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-lg">{opt.emoji}</span>
-                    {isSelected && <Check className="w-4 h-4 text-violet-400" />}
+                    <span className="text-base">{opt.emoji}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5" />}
                   </div>
-                  <div className="mt-1">
-                    <p className={`text-xs font-bold ${isSelected ? 'text-white' : 'text-slate-300'}`}>
+                  <div className="mt-1.5">
+                    <p className="text-xs font-semibold">
                       {opt.label}
                     </p>
-                    <p className="text-[10px] text-slate-500 truncate hidden sm:block">
+                    <p className={`text-[10px] truncate hidden sm:block ${isSelected ? 'opacity-80' : 'text-[var(--text-muted)]'}`}>
                       {opt.desc}
                     </p>
                   </div>
@@ -286,24 +284,24 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         {/* 2. INTENSIDADE (1 to 10 or Null) */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <label className="form-label mb-0">
               Intensidade da Dor
             </label>
             {intensity !== null ? (
               <div className="flex items-center gap-2">
-                <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
                   {intensity}/10 • {currentColor?.label}
                 </span>
                 <button
                   type="button"
                   onClick={() => setIntensity(null)}
-                  className="text-[11px] text-slate-500 hover:text-slate-300"
+                  className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   (Limpar)
                 </button>
               </div>
             ) : (
-              <span className="text-xs text-slate-500">Não informada (Padrão)</span>
+              <span className="text-xs text-[var(--text-muted)]">Não informada</span>
             )}
           </div>
 
@@ -315,10 +313,10 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   key={num}
                   type="button"
                   onClick={() => handleIntensityClick(num)}
-                  className={`h-9 sm:h-10 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                  className={`h-8 sm:h-9 rounded-md text-xs font-semibold transition-all ${
                     isSelected
-                      ? 'bg-violet-600 text-white shadow-md scale-105 ring-2 ring-violet-500/50'
-                      : 'bg-slate-950/80 border border-slate-800 text-slate-400 hover:bg-slate-850 hover:text-slate-200'
+                      ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-sm'
+                      : 'bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)]'
                   }`}
                 >
                   {num}
@@ -331,12 +329,12 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         {/* 3. MEDICAMENTOS (Com Seletor de Quantidade) */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-              <Pill className="w-3.5 h-3.5 text-violet-400" />
+            <label className="form-label mb-0 flex items-center gap-1.5">
+              <Pill className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
               Medicamentos Tomados
             </label>
             {medicationsTaken.length > 0 && (
-              <span className="text-xs text-violet-400 font-medium">
+              <span className="text-xs text-[var(--text-secondary)] font-medium">
                 {medicationsTaken.length} selecionado{medicationsTaken.length > 1 ? 's' : ''}
               </span>
             )}
@@ -351,17 +349,17 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   key={med.id}
                   type="button"
                   onClick={() => toggleMedication(med.name, med.dosage, med.id)}
-                  className={`text-xs sm:text-sm px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 ${
+                  className={`text-xs sm:text-sm px-3 py-1.5 rounded-md border transition-all flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-violet-600/30 border-violet-500 text-violet-200 font-semibold shadow-sm'
-                      : 'bg-slate-950/80 border-slate-800 text-slate-300 hover:bg-slate-850 hover:text-white'
+                      ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] font-medium shadow-sm'
+                      : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)]'
                   }`}
                 >
                   <span>💊 {med.name}</span>
                   {med.dosage && (
-                    <span className="text-[11px] opacity-80">({med.dosage})</span>
+                    <span className="text-[11px] opacity-75">({med.dosage})</span>
                   )}
-                  {isSelected && <Check className="w-3.5 h-3.5 text-violet-400" />}
+                  {isSelected && <Check className="w-3.5 h-3.5" />}
                 </button>
               );
             })}
@@ -374,11 +372,11 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   key={i}
                   type="button"
                   onClick={() => toggleMedication(customMed.name, customMed.dosage)}
-                  className="text-xs sm:text-sm px-3 py-1.5 rounded-xl border bg-violet-600/30 border-violet-500 text-violet-200 font-semibold flex items-center gap-1.5"
+                  className="text-xs sm:text-sm px-3 py-1.5 rounded-md border bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] font-medium flex items-center gap-1.5 shadow-sm"
                 >
                   <span>💊 {customMed.name}</span>
-                  {customMed.dosage && <span className="text-[11px]">({customMed.dosage})</span>}
-                  <Check className="w-3.5 h-3.5 text-violet-400" />
+                  {customMed.dosage && <span className="text-[11px] opacity-75">({customMed.dosage})</span>}
+                  <Check className="w-3.5 h-3.5" />
                 </button>
               ))}
 
@@ -387,7 +385,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAddingCustomMed(true)}
-                className="text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-dashed border-slate-700 text-slate-400 hover:text-violet-300 hover:border-violet-500/50 hover:bg-violet-950/20 transition-all flex items-center gap-1"
+                className="text-xs sm:text-sm px-3 py-1.5 rounded-md border border-dashed border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)] transition-all flex items-center gap-1"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Outro medicamento</span>
@@ -400,26 +398,26 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   value={customMedName}
                   onChange={e => setCustomMedName(e.target.value)}
                   autoFocus
-                  className="px-2.5 py-1 rounded-xl bg-slate-950 border border-violet-500 text-xs text-white outline-none w-36"
+                  className="px-2.5 py-1 rounded-md bg-[var(--card-bg)] border border-[var(--card-border-hover)] text-xs text-[var(--text-primary)] outline-none w-36"
                 />
                 <input
                   type="text"
                   placeholder="Dose (ex: 50mg)"
                   value={customMedDosage}
                   onChange={e => setCustomMedDosage(e.target.value)}
-                  className="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none w-24"
+                  className="px-2.5 py-1 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-primary)] outline-none w-24"
                 />
                 <button
                   type="button"
                   onClick={() => handleAddCustomMed()}
-                  className="px-2.5 py-1 rounded-lg bg-violet-600 text-white text-xs font-bold"
+                  className="px-2.5 py-1 rounded-md bg-[var(--color-primary)] text-[var(--bg-primary)] text-xs font-semibold hover:opacity-90 transition-opacity"
                 >
                   Adicionar
                 </button>
                 <button
                   type="button"
                   onClick={() => { setIsAddingCustomMed(false); setCustomMedName(''); setCustomMedDosage(''); }}
-                  className="p-1 text-slate-400 hover:text-white"
+                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -430,23 +428,23 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           {/* Detailed Selected Meds List with Quantity & Relief */}
           {medicationsTaken.length > 0 && (
             <div className="pt-2 space-y-2">
-              <span className="text-[11px] font-semibold text-slate-400">
-                Quantidade e eficácia dos remédios tomados:
+              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
+                Doses e eficácia:
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {medicationsTaken.map((m, idx) => (
                   <div 
                     key={idx} 
-                    className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex flex-col gap-2"
+                    className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] flex flex-col gap-2"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold text-white truncate">
+                      <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
                         💊 {m.name} {m.dosage ? `(${m.dosage})` : ''}
                       </span>
                       <button
                         type="button"
                         onClick={() => handleRemoveMed(idx)}
-                        className="text-slate-500 hover:text-rose-400 p-0.5"
+                        className="text-[var(--text-muted)] hover:text-[var(--color-below)] p-0.5 transition-colors"
                         title="Remover"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -455,22 +453,22 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
 
                     <div className="flex items-center justify-between gap-2">
                       {/* Quantity Selector */}
-                      <div className="flex items-center gap-1.5 bg-slate-900 border border-slate-800 px-1.5 py-1 rounded-lg">
-                        <span className="text-[10px] text-slate-400 font-medium mr-1">Qtd:</span>
+                      <div className="flex items-center gap-1.5 bg-[var(--card-bg)] border border-[var(--card-border)] px-1.5 py-1 rounded-md">
+                        <span className="text-[10px] text-[var(--text-muted)] font-medium mr-0.5">Qtd:</span>
                         <button
                           type="button"
                           onClick={() => handleUpdateMedQuantity(idx, -1)}
-                          className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs"
+                          className="w-5 h-5 rounded bg-[var(--bg-secondary)] hover:bg-[var(--card-border)] text-[var(--text-primary)] flex items-center justify-center text-xs transition-colors"
                         >
                           <Minus className="w-3 h-3" />
                         </button>
-                        <span className="text-xs font-bold text-white w-4 text-center">
+                        <span className="text-xs font-semibold text-[var(--text-primary)] w-4 text-center">
                           {m.quantity || 1}
                         </span>
                         <button
                           type="button"
                           onClick={() => handleUpdateMedQuantity(idx, 1)}
-                          className="w-5 h-5 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 flex items-center justify-center text-xs"
+                          className="w-5 h-5 rounded bg-[var(--bg-secondary)] hover:bg-[var(--card-border)] text-[var(--text-primary)] flex items-center justify-center text-xs transition-colors"
                         >
                           <Plus className="w-3 h-3" />
                         </button>
@@ -480,7 +478,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                       <select
                         value={m.relief || 'total'}
                         onChange={e => handleUpdateMedRelief(idx, e.target.value as ReliefLevel)}
-                        className="px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-200 outline-none flex-1"
+                        className="px-2 py-1 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-primary)] outline-none flex-1"
                       >
                         <option value="total">🌟 Alívio Total</option>
                         <option value="partial">⚖️ Alívio Parcial</option>
@@ -515,15 +513,15 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
 
         {/* 5. OBSERVAÇÕES */}
         <div className="space-y-1">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <label className="form-label mb-0">
             Observações (Opcional)
           </label>
           <textarea
             rows={2}
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            placeholder="Anotações do dia..."
-            className="w-full px-3 py-2 rounded-xl bg-slate-950/80 border border-slate-800 text-xs text-white placeholder-slate-500 outline-none focus:border-violet-500 resize-none"
+            placeholder="Anotações adicionais do dia..."
+            className="input-field resize-none text-xs"
           />
         </div>
 
@@ -533,7 +531,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             <button
               type="button"
               onClick={handleDelete}
-              className="px-3 py-2 rounded-xl border border-rose-800/60 bg-rose-950/20 hover:bg-rose-950/40 text-rose-300 text-xs font-semibold transition-colors"
+              className="btn btn-danger text-xs py-2 px-3"
             >
               Excluir Registro
             </button>
@@ -544,10 +542,10 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-md shadow-violet-950/50 transition-all flex items-center gap-1.5 active:scale-95"
+            className="btn btn-primary text-xs py-2 px-4 shadow-sm"
           >
             <Save className="w-3.5 h-3.5" />
-            {isSubmitting ? 'Salvando...' : (existingCrisis ? 'Atualizar Registro' : 'Salvar Registro do Dia')}
+            <span>{isSubmitting ? 'Salvando...' : (existingCrisis ? 'Atualizar Registro' : 'Salvar Registro do Dia')}</span>
           </button>
         </div>
 

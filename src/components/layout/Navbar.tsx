@@ -5,12 +5,16 @@ import {
   Pill, 
   Download, 
   User, 
-  BookOpen
+  BookOpen,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: 'timeline' | 'analytics' | 'medications';
   setActiveTab: (tab: 'timeline' | 'analytics' | 'medications') => void;
+  theme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
   onOpenExport: () => void;
   onOpenAuth: () => void;
 }
@@ -18,83 +22,102 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({
   activeTab,
   setActiveTab,
+  theme = 'dark',
+  onToggleTheme,
   onOpenExport,
   onOpenAuth
 }) => {
-  const { isFirebaseActive } = useAuth();
+  const { isFirebaseActive, user } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+    <header className="sticky top-0 z-40 bg-[var(--card-bg)]/90 backdrop-blur-md border-b border-[var(--card-border)] transition-colors">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 h-15 py-3 flex items-center justify-between gap-4">
         
-        {/* Logo with Emoji 🫩 */}
+        {/* Brand Logo & Name */}
         <div 
           onClick={() => setActiveTab('timeline')}
           className="flex items-center gap-2.5 cursor-pointer select-none group"
         >
-          <div className="w-9 h-9 rounded-xl bg-violet-950/80 border border-violet-800/60 flex items-center justify-center text-xl shadow-md shadow-violet-950/60 group-hover:scale-105 transition-transform">
+          <div className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] border border-[var(--card-border)] flex items-center justify-center text-lg shadow-sm transition-transform group-hover:scale-105">
             🫩
           </div>
-          <h1 className="font-bold text-base sm:text-lg text-white tracking-tight flex items-center gap-1.5">
+          <span className="font-semibold text-sm sm:text-base text-[var(--text-primary)] tracking-tight">
             Enxaquecator
-          </h1>
+          </span>
         </div>
 
-        {/* Desktop Tabs */}
-        <nav className="hidden sm:flex items-center gap-1 bg-slate-900/60 border border-slate-800 p-1 rounded-xl">
+        {/* Desktop Segmented Navigation */}
+        <nav className="hidden sm:flex items-center gap-1 bg-[var(--bg-secondary)] border border-[var(--card-border)] p-1 rounded-lg">
           <button
             onClick={() => setActiveTab('timeline')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
               activeTab === 'timeline'
-                ? 'bg-violet-600 text-white'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5" /> Diário & Calendário
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Diário & Calendário</span>
           </button>
 
           <button
             onClick={() => setActiveTab('analytics')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
               activeTab === 'analytics'
-                ? 'bg-violet-600 text-white'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <BarChart2 className="w-3.5 h-3.5" /> Estatísticas
+            <BarChart2 className="w-3.5 h-3.5" />
+            <span>Estatísticas</span>
           </button>
 
           <button
             onClick={() => setActiveTab('medications')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all flex items-center gap-1.5 ${
               activeTab === 'medications'
-                ? 'bg-violet-600 text-white'
-                : 'text-slate-400 hover:text-slate-200'
+                ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] shadow-sm'
+                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
-            <Pill className="w-3.5 h-3.5" /> Medicamentos
+            <Pill className="w-3.5 h-3.5" />
+            <span>Medicamentos</span>
           </button>
         </nav>
 
-        {/* Action Buttons */}
-        <div className="flex items-center gap-2">
+        {/* Header Action Buttons */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
           
+          {/* Theme Switcher */}
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              className="p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
+              title={theme === 'dark' ? 'Mudar para Tema Claro' : 'Mudar para Tema Escuro'}
+              aria-label="Alternar tema"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+            </button>
+          )}
+
+          {/* Export Button */}
           <button
             onClick={onOpenExport}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors"
-            title="Exportar dados e Laudo PDF"
+            className="p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all"
+            title="Exportar dados e Laudo Médico PDF"
           >
             <Download className="w-4 h-4" />
           </button>
 
+          {/* Auth Button */}
           <button
             onClick={onOpenAuth}
-            className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 hover:text-white transition-colors relative"
-            title="Conta / Nuvem"
+            className="p-2 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] hover:bg-[var(--bg-secondary)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all relative"
+            title={user ? `Conectado como ${user.displayName || user.email}` : 'Entrar / Sincronizar Nuvem'}
           >
             <User className="w-4 h-4" />
             {isFirebaseActive && (
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-[var(--card-bg)]" />
             )}
           </button>
 

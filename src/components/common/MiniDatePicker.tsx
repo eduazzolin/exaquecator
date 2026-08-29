@@ -71,12 +71,12 @@ export const MiniDatePicker: React.FC<MiniDatePickerProps> = ({ value, onChange 
           setViewDate(parseISO(value));
           setIsOpen(!isOpen);
         }}
-        className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-violet-500 text-slate-200 transition-all text-xs sm:text-sm font-bold shadow-sm"
+        className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] hover:border-[var(--card-border-hover)] text-[var(--text-primary)] transition-all text-xs sm:text-sm font-medium shadow-sm"
       >
-        <Calendar className="w-4 h-4 text-violet-400" />
+        <Calendar className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
         <span>{formatDateFull(value)}</span>
         {isToday && (
-          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-violet-950 text-violet-300 border border-violet-800/50">
+          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-[var(--bg-secondary)] text-[var(--text-secondary)] border border-[var(--card-border)]">
             Hoje
           </span>
         )}
@@ -84,28 +84,28 @@ export const MiniDatePicker: React.FC<MiniDatePickerProps> = ({ value, onChange 
 
       {/* Mini Calendar Popover */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-2 z-50 w-72 p-3.5 rounded-2xl bg-slate-950 border border-slate-800 shadow-2xl backdrop-blur-md animate-in fade-in zoom-in-95">
+        <div className="absolute top-full left-0 mt-2 z-50 w-72 p-3.5 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] shadow-xl animate-in">
           
           {/* Quick Buttons */}
-          <div className="flex items-center gap-1.5 pb-2 mb-2 border-b border-slate-800/80">
+          <div className="flex items-center gap-1.5 pb-2.5 mb-2.5 border-b border-[var(--card-border)]">
             <button
               type="button"
               onClick={() => handleSelectDay(new Date())}
-              className="flex-1 py-1 px-2 rounded-lg bg-violet-950/60 border border-violet-800/40 text-violet-300 text-xs font-semibold hover:bg-violet-900/60 transition-colors text-center"
+              className="flex-1 py-1 px-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)] text-xs font-medium hover:border-[var(--card-border-hover)] transition-colors text-center"
             >
               Hoje
             </button>
             <button
               type="button"
               onClick={() => handleSelectDay(subDays(new Date(), 1))}
-              className="flex-1 py-1 px-2 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold hover:bg-slate-850 transition-colors text-center"
+              className="flex-1 py-1 px-2 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] text-xs font-medium hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] transition-colors text-center"
             >
               Ontem
             </button>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="p-1 rounded-lg text-slate-500 hover:text-white"
+              className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)]"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -113,21 +113,21 @@ export const MiniDatePicker: React.FC<MiniDatePickerProps> = ({ value, onChange 
 
           {/* Month Header */}
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-white capitalize">
+            <span className="text-xs font-semibold text-[var(--text-primary)] capitalize">
               {format(viewDate, "MMMM 'de' yyyy", { locale: ptBR })}
             </span>
             <div className="flex items-center gap-0.5">
               <button
                 type="button"
                 onClick={() => setViewDate(subMonths(viewDate, 1))}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900"
+                className="p-1 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 type="button"
                 onClick={() => setViewDate(addMonths(viewDate, 1))}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900"
+                className="p-1 rounded-md text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -137,7 +137,7 @@ export const MiniDatePicker: React.FC<MiniDatePickerProps> = ({ value, onChange 
           {/* Week Days Header */}
           <div className="grid grid-cols-7 gap-1 text-center mb-1">
             {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((d, i) => (
-              <span key={i} className="text-[10px] font-bold text-slate-500">
+              <span key={i} className="text-[10px] font-semibold text-[var(--text-muted)]">
                 {d}
               </span>
             ))}
@@ -155,14 +155,14 @@ export const MiniDatePicker: React.FC<MiniDatePickerProps> = ({ value, onChange 
                   key={day.toISOString()}
                   type="button"
                   onClick={() => handleSelectDay(day)}
-                  className={`h-7 rounded-lg text-xs font-medium flex items-center justify-center transition-all ${
+                  className={`h-7 rounded-md text-xs font-medium flex items-center justify-center transition-all ${
                     !isCurrMonth
-                      ? 'opacity-20 text-slate-500'
+                      ? 'opacity-25 text-[var(--text-muted)]'
                       : isSelected
-                      ? 'bg-violet-600 text-white font-bold shadow-sm'
+                      ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] font-semibold shadow-sm'
                       : isTodayDay
-                      ? 'border border-violet-500 text-violet-300 font-bold bg-violet-950/30'
-                      : 'text-slate-300 hover:bg-slate-800'
+                      ? 'border border-[var(--card-border-hover)] text-[var(--text-primary)] font-semibold bg-[var(--bg-secondary)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]'
                   }`}
                 >
                   {format(day, 'd')}

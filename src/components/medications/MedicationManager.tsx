@@ -75,10 +75,10 @@ export const MedicationManager: React.FC = () => {
 
   const getCategoryLabel = (cat: MedicationCategory) => {
     switch (cat) {
-      case 'abortive': return { label: 'Abortivo / SOS (Triptanos/Específicos)', color: 'text-violet-400 bg-violet-950/40 border-violet-800/40' };
-      case 'painkiller': return { label: 'Analgésico / Anti-inflamatório', color: 'text-blue-400 bg-blue-950/40 border-blue-800/40' };
-      case 'preventive': return { label: 'Uso Contínuo / Preventivo', color: 'text-emerald-400 bg-emerald-950/40 border-emerald-800/40' };
-      case 'other': return { label: 'Outro', color: 'text-slate-400 bg-slate-900 border-slate-700' };
+      case 'abortive': return { label: 'Abortivo / SOS (Triptanos)', color: 'text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20' };
+      case 'painkiller': return { label: 'Analgésico / Anti-inflamatório', color: 'text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20' };
+      case 'preventive': return { label: 'Uso Contínuo / Preventivo', color: 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20' };
+      case 'other': return { label: 'Outro', color: 'text-[var(--text-muted)] bg-[var(--bg-secondary)] border-[var(--card-border)]' };
     }
   };
 
@@ -86,34 +86,35 @@ export const MedicationManager: React.FC = () => {
     <div className="space-y-6">
       
       {/* Header Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-violet-950/40 to-slate-900 border border-slate-800">
+      <div className="glass p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Pill className="w-5 h-5 text-violet-400" />
+          <h2 className="text-lg sm:text-xl font-semibold text-[var(--text-primary)] flex items-center gap-2">
+            <Pill className="w-5 h-5 text-[var(--text-secondary)]" />
             Catálogo de Medicamentos
           </h2>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Cadastre seus remédios frequentes para adicioná-los com 1 toque durante as crises
+          <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-1">
+            Cadastre seus remédios frequentes para adicioná-los com 1 toque durante os episódios.
           </p>
         </div>
 
         <button
           onClick={openNewModal}
-          className="px-4 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-sm font-bold shadow-lg shadow-violet-950/50 transition-all flex items-center justify-center gap-2 self-start sm:self-auto"
+          className="btn btn-primary text-xs self-start sm:self-auto py-2 px-3.5 shadow-sm"
         >
-          <Plus className="w-4 h-4" /> Novo Medicamento
+          <Plus className="w-4 h-4" />
+          <span>Novo Medicamento</span>
         </button>
       </div>
 
       {/* Grid of Medications */}
       {medications.length === 0 ? (
-        <div className="p-12 text-center border border-dashed border-slate-800 rounded-2xl">
-          <Pill className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-          <p className="text-slate-300 font-semibold">Nenhum remédio cadastrado</p>
-          <p className="text-xs text-slate-500 mt-1 mb-4">Adicione os remédios que você costuma tomar para alívio rápido.</p>
+        <div className="p-12 text-center border border-dashed border-[var(--card-border)] rounded-lg">
+          <Pill className="w-10 h-10 text-[var(--text-muted)] mx-auto mb-2" />
+          <p className="text-[var(--text-primary)] font-semibold text-sm">Nenhum remédio cadastrado</p>
+          <p className="text-xs text-[var(--text-muted)] mt-1 mb-4">Adicione os remédios que você costuma tomar para alívio rápido.</p>
           <button
             onClick={openNewModal}
-            className="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold"
+            className="btn btn-primary text-xs"
           >
             Cadastrar Primeiro Medicamento
           </button>
@@ -125,42 +126,42 @@ export const MedicationManager: React.FC = () => {
             return (
               <div
                 key={med.id}
-                className="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 hover:border-slate-700 transition-all flex flex-col justify-between group"
+                className="glass glass-hover p-4 sm:p-5 flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div>
-                      <h3 className="font-bold text-base text-white">{med.name}</h3>
-                      <span className="text-xs font-medium text-slate-400">{med.dosage || 'Sem dose padrão'}</span>
+                      <h3 className="font-semibold text-sm sm:text-base text-[var(--text-primary)]">{med.name}</h3>
+                      <span className="text-xs font-medium text-[var(--text-muted)]">{med.dosage || 'Sem dose padrão'}</span>
                     </div>
 
                     <button
                       onClick={() => toggleMedicationFavorite(med.id)}
-                      className={`p-1.5 rounded-lg transition-colors ${
+                      className={`p-1.5 rounded-md transition-colors ${
                         med.isFavorite
-                          ? 'text-amber-400 bg-amber-950/40 hover:bg-amber-900/50'
-                          : 'text-slate-600 hover:text-slate-300'
+                          ? 'text-amber-500 bg-amber-500/10 hover:bg-amber-500/20'
+                          : 'text-[var(--text-muted)] hover:text-[var(--text-primary)]'
                       }`}
                       title={med.isFavorite ? 'Remover dos favoritos' : 'Favoritar para acesso rápido'}
                     >
-                      <Star className={`w-4 h-4 ${med.isFavorite ? 'fill-amber-400' : ''}`} />
+                      <Star className={`w-4 h-4 ${med.isFavorite ? 'fill-amber-500' : ''}`} />
                     </button>
                   </div>
 
-                  <span className={`inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-md border mb-2 ${catInfo.color}`}>
+                  <span className={`inline-block text-[10px] font-semibold px-2 py-0.5 rounded border mb-2 ${catInfo.color}`}>
                     {catInfo.label}
                   </span>
 
                   {med.notes && (
-                    <p className="text-xs text-slate-400 italic line-clamp-2 mt-1">
+                    <p className="text-xs text-[var(--text-secondary)] italic line-clamp-2 mt-1">
                       {med.notes}
                     </p>
                   )}
                 </div>
 
-                <div className="flex items-center justify-between pt-3 mt-3 border-t border-slate-800/80 text-xs">
+                <div className="flex items-center justify-between pt-3 mt-3 border-t border-[var(--card-border)] text-xs">
                   {med.isFavorite ? (
-                    <span className="text-[11px] text-amber-400/90 flex items-center gap-1 font-medium">
+                    <span className="text-[10px] text-amber-600 dark:text-amber-400 flex items-center gap-1 font-medium">
                       <Sparkles className="w-3 h-3" /> Acesso Rápido Ativo
                     </span>
                   ) : <span />}
@@ -168,14 +169,14 @@ export const MedicationManager: React.FC = () => {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => openEditModal(med)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                      className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] transition-colors"
                       title="Editar"
                     >
                       <Edit2 className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={() => handleDelete(med.id)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
+                      className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--color-below)] hover:bg-[var(--bg-secondary)] transition-colors"
                       title="Excluir"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -190,25 +191,25 @@ export const MedicationManager: React.FC = () => {
 
       {/* Modal Add / Edit */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-slate-950 border border-slate-800 rounded-3xl w-full max-w-md shadow-2xl overflow-hidden text-slate-100 animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in">
+          <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl w-full max-w-md shadow-2xl overflow-hidden text-[var(--text-primary)]">
             
-            <div className="p-5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
-              <h3 className="font-bold text-lg text-white flex items-center gap-2">
-                <Pill className="w-5 h-5 text-violet-400" />
+            <div className="p-4 sm:p-5 bg-[var(--bg-secondary)] border-b border-[var(--card-border)] flex items-center justify-between">
+              <h3 className="font-semibold text-base text-[var(--text-primary)] flex items-center gap-2">
+                <Pill className="w-4 h-4 text-[var(--text-secondary)]" />
                 {editingMed ? 'Editar Medicamento' : 'Novo Medicamento'}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white"
+                className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)]"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="p-5 space-y-4">
-              <div className="space-y-1">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div>
+                <label className="form-label">
                   Nome do Remédio *
                 </label>
                 <input
@@ -217,12 +218,12 @@ export const MedicationManager: React.FC = () => {
                   placeholder="Ex: Sumatriptana, Naratriptana, Dipirona"
                   value={name}
                   onChange={e => setName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:border-violet-500 outline-none"
+                  className="input-field text-xs"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div>
+                <label className="form-label">
                   Dosagem Padrão
                 </label>
                 <input
@@ -230,18 +231,18 @@ export const MedicationManager: React.FC = () => {
                   placeholder="Ex: 50mg, 1g, 2.5mg, 1 comprimido"
                   value={dosage}
                   onChange={e => setDosage(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:border-violet-500 outline-none"
+                  className="input-field text-xs"
                 />
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div>
+                <label className="form-label">
                   Categoria
                 </label>
                 <select
                   value={category}
                   onChange={e => setCategory(e.target.value as MedicationCategory)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:border-violet-500 outline-none"
+                  className="input-field text-xs"
                 >
                   <option value="abortive">Abortivo / SOS (Triptanos/Específicos para Crise)</option>
                   <option value="painkiller">Analgésico / Anti-inflamatório Comum</option>
@@ -250,8 +251,8 @@ export const MedicationManager: React.FC = () => {
                 </select>
               </div>
 
-              <div className="space-y-1">
-                <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <div>
+                <label className="form-label">
                   Instruções / Observações
                 </label>
                 <textarea
@@ -259,34 +260,34 @@ export const MedicationManager: React.FC = () => {
                   placeholder="Ex: Tomar no máximo 2 ao dia; tomar junto com alimentação"
                   value={notes}
                   onChange={e => setNotes(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-sm text-white focus:border-violet-500 outline-none resize-none"
+                  className="input-field text-xs resize-none"
                 />
               </div>
 
-              <label className="flex items-center gap-2.5 p-3 rounded-xl bg-slate-900 border border-slate-800 cursor-pointer">
+              <label className="flex items-center gap-2.5 p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isFavorite}
                   onChange={e => setIsFavorite(e.target.checked)}
-                  className="rounded border-slate-700 text-violet-600 focus:ring-violet-500 bg-slate-950"
+                  className="rounded border-[var(--card-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                 />
                 <div className="text-xs">
-                  <p className="font-semibold text-white">Adicionar aos Favoritos (Acesso Rápido)</p>
-                  <p className="text-slate-400">Aparecerá com 1 toque no Modo Emergência durante a dor</p>
+                  <p className="font-semibold text-[var(--text-primary)]">Adicionar aos Favoritos</p>
+                  <p className="text-[var(--text-muted)]">Aparecerá destacado na seleção do diário</p>
                 </div>
               </label>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[var(--card-border)]">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-slate-400 hover:text-white text-xs font-medium"
+                  className="btn btn-secondary text-xs"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold shadow-md shadow-violet-950"
+                  className="btn btn-primary text-xs"
                 >
                   {editingMed ? 'Atualizar Medicamento' : 'Salvar Medicamento'}
                 </button>

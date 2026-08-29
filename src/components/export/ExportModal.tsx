@@ -78,22 +78,22 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in">
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden text-slate-100 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in">
+      <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-xl w-full max-w-lg shadow-2xl overflow-hidden text-[var(--text-primary)] flex flex-col">
         
         {/* Header */}
-        <div className="p-4 sm:p-5 bg-slate-900 border-b border-slate-800 flex items-center justify-between">
+        <div className="p-4 sm:p-5 bg-[var(--bg-secondary)] border-b border-[var(--card-border)] flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <Download className="w-5 h-5 text-violet-400" />
-            <h2 className="text-base sm:text-lg font-bold text-white">
+            <Download className="w-4 h-4 text-[var(--text-secondary)]" />
+            <h2 className="text-base font-semibold text-[var(--text-primary)]">
               Exportar & Relatórios
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800"
+            className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -101,9 +101,9 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         <div className="p-4 sm:p-5 space-y-4">
           
           {/* Patient name & Date filters */}
-          <div className="space-y-3 p-3.5 rounded-xl bg-slate-900/60 border border-slate-800">
-            <div className="space-y-1">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <div className="space-y-3 p-3.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)]">
+            <div>
+              <label className="form-label">
                 Nome do Paciente no Laudo
               </label>
               <input
@@ -111,13 +111,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                 value={patientName}
                 onChange={e => setPatientName(e.target.value)}
                 placeholder="Ex: Seu Nome"
-                className="w-full px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs sm:text-sm text-white focus:border-violet-500 outline-none"
+                className="input-field text-xs"
               />
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                <Calendar className="w-3.5 h-3.5 text-violet-400" />
+              <label className="form-label mb-0 flex items-center gap-1.5">
+                <Calendar className="w-3 h-3 text-[var(--text-secondary)]" />
                 Período
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
@@ -131,10 +131,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
                     key={opt.id}
                     type="button"
                     onClick={() => setDateRangeOption(opt.id as any)}
-                    className={`py-1.5 px-2 rounded-lg text-xs font-semibold border transition-all ${
+                    className={`py-1.5 px-2 rounded-md text-xs font-medium border transition-all ${
                       dateRangeOption === opt.id
-                        ? 'bg-violet-600 border-violet-500 text-white'
-                        : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                        ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] shadow-sm'
+                        : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
                     }`}
                   >
                     {opt.label}
@@ -148,57 +148,57 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <div className="space-y-2.5">
             
             {/* Option 1: PDF Medical Report */}
-            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-violet-800/40 flex items-center justify-between gap-3">
+            <div className="p-3.5 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 text-violet-400 flex-shrink-0" />
+                <FileText className="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0" />
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-white">Relatório Médico (PDF)</h4>
-                  <p className="text-[11px] text-slate-400">Pronto para consultas com neurologista</p>
+                  <h4 className="font-semibold text-xs sm:text-sm text-[var(--text-primary)]">Relatório Médico (PDF)</h4>
+                  <p className="text-[11px] text-[var(--text-muted)]">Pronto para consultas e laudos médicos</p>
                 </div>
               </div>
 
               <button
                 onClick={handleExportPDF}
                 disabled={isExportingPDF || filtered.length === 0}
-                className="px-3 py-1.5 rounded-lg bg-violet-600 hover:bg-violet-500 text-white text-xs font-bold transition-all disabled:opacity-50"
+                className="btn btn-primary text-xs py-1.5 px-3 disabled:opacity-40"
               >
                 {isExportingPDF ? 'Gerando...' : 'Baixar PDF'}
               </button>
             </div>
 
             {/* Option 2: CSV */}
-            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-3">
+            <div className="p-3.5 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <FileSpreadsheet className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                <FileSpreadsheet className="w-5 h-5 text-emerald-500 flex-shrink-0" />
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-white">Planilha (CSV)</h4>
-                  <p className="text-[11px] text-slate-400">Compatível com Excel e Google Planilhas</p>
+                  <h4 className="font-semibold text-xs sm:text-sm text-[var(--text-primary)]">Planilha (CSV)</h4>
+                  <p className="text-[11px] text-[var(--text-muted)]">Compatível com Excel e Planilhas</p>
                 </div>
               </div>
 
               <button
                 onClick={handleExportCSV}
                 disabled={filtered.length === 0}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-all disabled:opacity-50"
+                className="btn btn-secondary text-xs py-1.5 px-3 disabled:opacity-40"
               >
                 Baixar CSV
               </button>
             </div>
 
             {/* Option 3: JSON */}
-            <div className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800 flex items-center justify-between gap-3">
+            <div className="p-3.5 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <FileCode className="w-5 h-5 text-sky-400 flex-shrink-0" />
+                <FileCode className="w-5 h-5 text-sky-500 flex-shrink-0" />
                 <div>
-                  <h4 className="font-bold text-xs sm:text-sm text-white">Backup (JSON)</h4>
-                  <p className="text-[11px] text-slate-400">Arquivo bruto de segurança</p>
+                  <h4 className="font-semibold text-xs sm:text-sm text-[var(--text-primary)]">Backup (JSON)</h4>
+                  <p className="text-[11px] text-[var(--text-muted)]">Arquivo de dados estruturados</p>
                 </div>
               </div>
 
               <button
                 onClick={handleExportJSON}
                 disabled={filtered.length === 0}
-                className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 transition-all disabled:opacity-50"
+                className="btn btn-secondary text-xs py-1.5 px-3 disabled:opacity-40"
               >
                 Baixar JSON
               </button>
