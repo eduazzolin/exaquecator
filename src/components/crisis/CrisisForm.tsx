@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { MedicationTaken, ReliefLevel } from '../../types';
 import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor } from '../../utils/constants';
-import { formatDateFull, getTodayDateString } from '../../utils/dateUtils';
+import { formatDateFull } from '../../utils/dateUtils';
 import { TagPicker } from '../common/TagPicker';
-import { Plus, Trash2, Pill, Save, Calendar, Check } from 'lucide-react';
+import { MiniDatePicker } from '../common/MiniDatePicker';
+import { Plus, Pill, Save, Check, X } from 'lucide-react';
 
 interface CrisisFormProps {
   selectedDate: string;
@@ -27,6 +28,11 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Custom med input modal/drawer state
+  const [isAddingCustomMed, setIsAddingCustomMed] = useState(false);
+  const [customMedName, setCustomMedName] = useState('');
+  const [customMedDosage, setCustomMedDosage] = useState('');
+
   // Sync form whenever selectedDate or crises list changes
   useEffect(() => {
     if (existingCrisis) {
@@ -36,7 +42,6 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
       setMedicationsTaken(existingCrisis.medicationsTaken || []);
       setNotes(existingCrisis.notes || '');
     } else {
-      // Default blank state (intensity is null by default)
       setIntensity(null);
       setSymptoms([]);
       setTriggers([]);
@@ -53,36 +58,47 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
     }
   };
 
-  const handleAddMedication = (medId?: string) => {
-    let name = '';
-    let dosage = '';
-    if (medId) {
-      const found = medications.find(m => m.id === medId);
-      if (found) {
-        name = found.name;
-        dosage = found.dosage;
-      }
+  // Toggle medication from catalog buttons
+  const toggleMedication = (name: string, defaultDosage: string, medId?: string) => {
+    const existingIndex = medicationsTaken.findIndex(m => m.name.toLowerCase() === name.toLowerCase());
+    if (existingIndex >= 0) {
+      // Remove
+      setMedicationsTaken(medicationsTaken.filter((_, i) => i !== existingIndex));
+    } else {
+      // Add
+      setMedicationsTaken([
+        ...medicationsTaken,
+        {
+          medicationId: medId,
+          name,
+          dosage: defaultDosage,
+          relief: 'total'
+        }
+      ]);
     }
-
-    setMedicationsTaken([
-      ...medicationsTaken,
-      {
-        medicationId: medId,
-        name,
-        dosage,
-        relief: 'total'
-      }
-    ]);
   };
 
-  const handleUpdateMed = (index: number, field: keyof MedicationTaken, value: any) => {
+  const handleUpdateMedRelief = (index: number, relief: ReliefLevel) => {
     const updated = [...medicationsTaken];
-    updated[index] = { ...updated[index], [field]: value };
+    updated[index] = { ...updated[index], relief };
     setMedicationsTaken(updated);
   };
 
-  const handleRemoveMed = (index: number) => {
-    setMedicationsTaken(medicationsTaken.filter((_, i) => i !== index));
+  const handleAddCustomMed = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (customMedName.trim()) {
+      setMedicationsTaken([
+        ...medicationsTaken,
+        {
+          name: customMedName.trim(),
+          dosage: customMedDosage.trim(),
+          relief: 'total'
+        }
+      ]);
+      setCustomMedName('');
+      setCustomMedDosage('');
+      setIsAddingCustomMed(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,48 +141,35 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   };
 
   const currentColor = intensity !== null ? getIntensityColor(intensity) : null;
-  const isToday = selectedDate === getTodayDateString();
 
   return (
     <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
       
-      {/* Top Header: Date Selector & Status Indicator */}
+      {/* Top Header: Mini Calendar Picker & Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
-        
-        <div className="flex items-center gap-2.5">
-          <Calendar className="w-5 h-5 text-violet-400 flex-shrink-0" />
+        <div className="space-y-1">
+          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+            Data do Registro
+          </label>
           <div>
-            <div className="flex items-center gap-2">
-              <input
-                type="date"
-                value={selectedDate}
-                onChange={e => onDateChange(e.target.value)}
-                className="px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-xs sm:text-sm font-bold text-white outline-none focus:border-violet-500 cursor-pointer"
-              />
-              {isToday && (
-                <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-violet-950 text-violet-300 border border-violet-800/50">
-                  Hoje
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-slate-400 mt-0.5">
-              {formatDateFull(selectedDate)}
-            </p>
+            <MiniDatePicker
+              value={selectedDate}
+              onChange={onDateChange}
+            />
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div>
           {existingCrisis ? (
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 flex items-center gap-1">
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-950/80 text-emerald-300 border border-emerald-800/60 flex items-center gap-1.5 self-start sm:self-auto">
               <Check className="w-3.5 h-3.5" /> Dia Registrado (Modo Edição)
             </span>
           ) : (
             <span className="text-xs text-slate-400">
-              Nenhum registro neste dia
+              Nenhum registro salvo neste dia
             </span>
           )}
         </div>
-
       </div>
 
       {/* Main Form */}
@@ -176,7 +179,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Intensidade da Dor (Opcional)
+              Intensidade da Dor
             </label>
             {intensity !== null ? (
               <div className="flex items-center gap-2">
@@ -217,89 +220,130 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           </div>
         </div>
 
-        {/* Medications Section */}
+        {/* 1. Medications in Button Chips (Like Triggers) */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
               <Pill className="w-3.5 h-3.5 text-violet-400" />
               Medicamentos Tomados
             </label>
-
-            {medications.length > 0 && (
-              <select
-                onChange={e => {
-                  if (e.target.value) {
-                    handleAddMedication(e.target.value);
-                    e.target.value = '';
-                  }
-                }}
-                defaultValue=""
-                className="text-xs px-2 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-300 outline-none cursor-pointer hover:border-violet-500"
-              >
-                <option value="" disabled>+ Adicionar do Catálogo</option>
-                {medications.map(m => (
-                  <option key={m.id} value={m.id}>{m.name} ({m.dosage})</option>
-                ))}
-              </select>
+            {medicationsTaken.length > 0 && (
+              <span className="text-xs text-violet-400 font-medium">
+                {medicationsTaken.length} selecionado{medicationsTaken.length > 1 ? 's' : ''}
+              </span>
             )}
           </div>
 
-          {medicationsTaken.length > 0 && (
-            <div className="space-y-2">
-              {medicationsTaken.map((med, idx) => (
-                <div
-                  key={idx}
-                  className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2"
+          {/* Catalog Medication Chips */}
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+            {medications.map(med => {
+              const isSelected = medicationsTaken.some(m => m.name.toLowerCase() === med.name.toLowerCase());
+              return (
+                <button
+                  key={med.id}
+                  type="button"
+                  onClick={() => toggleMedication(med.name, med.dosage, med.id)}
+                  className={`text-xs sm:text-sm px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-violet-600/30 border-violet-500 text-violet-200 font-semibold shadow-sm'
+                      : 'bg-slate-950/80 border-slate-800 text-slate-300 hover:bg-slate-850 hover:text-white'
+                  }`}
                 >
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    <input
-                      type="text"
-                      placeholder="Nome do remédio"
-                      value={med.name}
-                      onChange={e => handleUpdateMed(idx, 'name', e.target.value)}
-                      className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-white outline-none focus:border-violet-500"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Dose (ex: 50mg)"
-                      value={med.dosage}
-                      onChange={e => handleUpdateMed(idx, 'dosage', e.target.value)}
-                      className="px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-white outline-none focus:border-violet-500"
-                    />
-                    <div className="flex items-center gap-1">
-                      <select
-                        value={med.relief || 'total'}
-                        onChange={e => handleUpdateMed(idx, 'relief', e.target.value as ReliefLevel)}
-                        className="w-full px-2 py-1.5 rounded-lg bg-slate-900 border border-slate-800 text-xs text-slate-200 outline-none"
-                      >
-                        <option value="total">Alívio Total</option>
-                        <option value="partial">Alívio Parcial</option>
-                        <option value="none">Sem Alívio</option>
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveMed(idx)}
-                        className="p-1.5 text-slate-500 hover:text-rose-400"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                  <span>💊 {med.name}</span>
+                  {med.dosage && (
+                    <span className="text-[11px] opacity-80">({med.dosage})</span>
+                  )}
+                  {isSelected && <Check className="w-3.5 h-3.5 text-violet-400" />}
+                </button>
+              );
+            })}
+
+            {/* Custom Extra Meds already added that are not in catalog */}
+            {medicationsTaken
+              .filter(m => !medications.some(cat => cat.name.toLowerCase() === m.name.toLowerCase()))
+              .map((customMed, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => toggleMedication(customMed.name, customMed.dosage)}
+                  className="text-xs sm:text-sm px-3 py-1.5 rounded-xl border bg-violet-600/30 border-violet-500 text-violet-200 font-semibold flex items-center gap-1.5"
+                >
+                  <span>💊 {customMed.name}</span>
+                  {customMed.dosage && <span className="text-[11px]">({customMed.dosage})</span>}
+                  <Check className="w-3.5 h-3.5 text-violet-400" />
+                </button>
               ))}
+
+            {/* Add Custom Button */}
+            {!isAddingCustomMed ? (
+              <button
+                type="button"
+                onClick={() => setIsAddingCustomMed(true)}
+                className="text-xs sm:text-sm px-3 py-1.5 rounded-xl border border-dashed border-slate-700 text-slate-400 hover:text-violet-300 hover:border-violet-500/50 hover:bg-violet-950/20 transition-all flex items-center gap-1"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Outro medicamento</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <input
+                  type="text"
+                  placeholder="Nome do remédio"
+                  value={customMedName}
+                  onChange={e => setCustomMedName(e.target.value)}
+                  autoFocus
+                  className="px-2.5 py-1 rounded-xl bg-slate-950 border border-violet-500 text-xs text-white outline-none w-36"
+                />
+                <input
+                  type="text"
+                  placeholder="Dose (ex: 50mg)"
+                  value={customMedDosage}
+                  onChange={e => setCustomMedDosage(e.target.value)}
+                  className="px-2.5 py-1 rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none w-24"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleAddCustomMed()}
+                  className="px-2.5 py-1 rounded-lg bg-violet-600 text-white text-xs font-bold"
+                >
+                  Adicionar
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setIsAddingCustomMed(false); setCustomMedName(''); setCustomMedDosage(''); }}
+                  className="p-1 text-slate-400 hover:text-white"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Quick Relief Rating for Selected Meds */}
+          {medicationsTaken.length > 0 && (
+            <div className="pt-2 space-y-1.5">
+              <span className="text-[11px] font-semibold text-slate-400">Eficácia percebida dos remédios selecionados:</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {medicationsTaken.map((m, idx) => (
+                  <div key={idx} className="p-2 rounded-xl bg-slate-950 border border-slate-800/80 flex items-center justify-between gap-2">
+                    <span className="text-xs font-semibold text-white truncate">💊 {m.name}</span>
+                    <select
+                      value={m.relief || 'total'}
+                      onChange={e => handleUpdateMedRelief(idx, e.target.value as ReliefLevel)}
+                      className="px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-xs text-slate-200 outline-none"
+                    >
+                      <option value="total">🌟 Alívio Total</option>
+                      <option value="partial">⚖️ Alívio Parcial</option>
+                      <option value="none">❌ Sem Alívio</option>
+                    </select>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-
-          <button
-            type="button"
-            onClick={() => handleAddMedication()}
-            className="text-xs text-violet-400 hover:text-violet-300 font-medium inline-flex items-center gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" /> Adicionar Medicamento
-          </button>
         </div>
 
-        {/* Symptoms & Triggers */}
+        {/* 2. Symptoms & Triggers with Emojis */}
         <div className="space-y-3 pt-1">
           <TagPicker
             label="Sintomas"
@@ -318,7 +362,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           />
         </div>
 
-        {/* Notes */}
+        {/* 3. Notes */}
         <div className="space-y-1">
           <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
             Observações (Opcional)

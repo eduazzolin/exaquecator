@@ -1,49 +1,37 @@
 import { Medication } from '../types';
 
 export const COMMON_SYMPTOMS = [
-  'Fotofobia (sensibilidade à luz)',
-  'Fonofobia (sensibilidade ao som)',
-  'Náusea / Enjoo',
-  'Vômito',
-  'Aura visual (pontos cegos / luzes)',
-  'Tontura / Vertigem',
-  'Visão turva',
-  'Rigidez no pescoço / Trapézio',
-  'Fadiga intensa / Sonolência',
-  'Dificuldade de concentração',
-  'Sensibilidade a odores (osmofobia)',
-  'Palpitações'
+  '☀️ Fotofobia (luz)',
+  '🔊 Fonofobia (som)',
+  '🤢 Náusea / Enjoo',
+  '🤮 Vômito',
+  '✨ Aura visual (luzes/pontos)',
+  '💫 Tontura / Vertigem',
+  '👁️ Visão turva',
+  '💥 Dor latejante / Pulsátil',
+  '🫨 Rigidez no pescoço',
+  '🥱 Fadiga / Sonolência',
+  '🧠 Dificuldade de concentração',
+  '👃 Sensibilidade a odores'
 ];
 
 export const COMMON_TRIGGERS = [
-  'Estresse / Ansiedade',
-  'Noite mal dormida / Insônia',
-  'Dormir mais do que o habitual',
-  'Jejum prolongado / Pular refeição',
-  'Café / Cafeína em excesso',
-  'Falta de café (abstinência)',
-  'Chocolate',
-  'Queijos curados / Embutidos',
-  'Álcool / Vinho tinto',
-  'Luz solar direta / Telas em excesso',
-  'Mudança brusca de temperatura / Clima',
-  'Tensão muscular / Postura',
-  'Período menstrual / Hormonal',
-  'Cheiro forte / Perfume',
-  'Barulho excessivo'
-];
-
-export const PAIN_LOCATIONS = [
-  'Têmpora Esquerda',
-  'Têmpora Direita',
-  'Ambas as Têmporas',
-  'Frontal / Testa',
-  'Atrás do Olho Esquerdo',
-  'Atrás do Olho Direito',
-  'Nuca / Base do Crânio',
-  'Topo da Cabeça (Vértex)',
-  'Pescoço / Ombros',
-  'Toda a Cabeça (Holocraniana)'
+  '😰 Estresse / Ansiedade',
+  '🥱 Pouco sono / Insônia',
+  '😴 Dormir demais',
+  '🍽️ Jejum / Pular refeição',
+  '☕ Excesso de café',
+  '🚫 Falta de café',
+  '🍫 Chocolate',
+  '🧀 Queijo / Embutidos',
+  '🍷 Vinho / Álcool',
+  '💻 Telas em excesso',
+  '☀️ Sol forte / Calor',
+  '🌦️ Mudança de tempo',
+  '🧘 Má postura / Tensão',
+  '🩸 Hormonal / Menstruação',
+  '🌸 Perfume / Cheiro forte',
+  '📢 Barulho excessivo'
 ];
 
 export const DEFAULT_MEDICATIONS: Medication[] = [
@@ -52,7 +40,7 @@ export const DEFAULT_MEDICATIONS: Medication[] = [
     name: 'Sumatriptana',
     dosage: '50mg',
     category: 'abortive',
-    notes: 'Tomar no início da crise',
+    notes: 'Tomar no início da dor',
     isFavorite: true,
     createdAt: new Date().toISOString()
   },
@@ -61,7 +49,7 @@ export const DEFAULT_MEDICATIONS: Medication[] = [
     name: 'Zolmitriptana',
     dosage: '2.5mg',
     category: 'abortive',
-    notes: 'Triptano de ação rápida',
+    notes: 'Ação rápida',
     isFavorite: true,
     createdAt: new Date().toISOString()
   },
@@ -97,7 +85,7 @@ export const DEFAULT_MEDICATIONS: Medication[] = [
     name: 'Topiramato',
     dosage: '25mg',
     category: 'preventive',
-    notes: 'Uso diário preventivo',
+    notes: 'Uso contínuo',
     isFavorite: false,
     createdAt: new Date().toISOString()
   }
@@ -106,7 +94,7 @@ export const DEFAULT_MEDICATIONS: Medication[] = [
 export const INTENSITY_COLORS: Record<number, { bg: string; text: string; border: string; label: string }> = {
   1: { bg: 'bg-emerald-500/15', text: 'text-emerald-400', border: 'border-emerald-500/30', label: 'Mínima' },
   2: { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/40', label: 'Leve' },
-  3: { bg: 'bg-teal-500/20', text: 'text-teal-400', border: 'border-teal-500/40', label: 'Leve-Moderada' },
+  3: { bg: 'bg-teal-500/20', text: 'text-teal-400', border: 'border-teal-500/40', label: 'Leve' },
   4: { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/40', label: 'Moderada' },
   5: { bg: 'bg-yellow-500/25', text: 'text-yellow-400', border: 'border-yellow-500/50', label: 'Moderada' },
   6: { bg: 'bg-amber-500/20', text: 'text-amber-400', border: 'border-amber-500/50', label: 'Moderada-Intensa' },
