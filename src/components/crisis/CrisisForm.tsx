@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { MedicationTaken, ReliefLevel, CrisisType } from '../../types';
 import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor } from '../../utils/constants';
-import { formatDateFull, getTodayDateString, getCurrentTimeString } from '../../utils/dateUtils';
+import { formatDateFull } from '../../utils/dateUtils';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
 import { Plus, Minus, Pill, Save, Check, X, Clock, Trash2, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
@@ -50,9 +50,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         setShowAdvanced(true);
       }
     } else {
-      // Auto-preencher hora atual se for a data de hoje (zero esforço para o usuário)
-      const isToday = selectedDate === getTodayDateString();
-      setStartTime(isToday ? getCurrentTimeString() : '');
+      setStartTime('');
       setType('presenca');
       setIntensity(null);
       setSymptoms([]);

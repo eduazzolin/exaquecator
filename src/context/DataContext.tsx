@@ -9,8 +9,6 @@ import {
   saveMedicationToStorage,
   deleteMedicationFromStorage
 } from '../services/storageService';
-import { fetchWeatherForDate } from '../services/weatherService';
-import { getTimeOfDayFromTime } from '../utils/dateUtils';
 
 interface DataContextType {
   crises: CrisisRecord[];
@@ -79,31 +77,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // --- Crisis Handlers ---
 
-  // Helper para enriquecer silenciosamente um registro com clima
-  const enrichRecordWithWeather = async (record: CrisisRecord) => {
-    try {
-      const weather = await fetchWeatherForDate(record.date);
-      if (weather) {
-        const enriched: CrisisRecord = {
-          ...record,
-          weather,
-          updatedAt: new Date().toISOString()
-        };
-        setCrises(prev => prev.map(c => c.id === record.id ? enriched : c));
-        await saveCrisisToStorage(enriched, user?.uid);
-      }
-    } catch (e) {
-      console.warn('Background weather enrichment error:', e);
-    }
-  };
-
   const addCrisis = async (crisisData: Omit<CrisisRecord, 'id' | 'createdAt' | 'updatedAt'>): Promise<CrisisRecord> => {
     const now = new Date().toISOString();
-    const timeOfDay = crisisData.timeOfDay || getTimeOfDayFromTime(crisisData.startTime);
-    
     const newCrisis: CrisisRecord = {
       ...crisisData,
-      timeOfDay,
       id: `crisis-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       userId: user?.uid,
       createdAt: now,
@@ -114,33 +91,19 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setCrises(updated);
     await saveCrisisToStorage(newCrisis, user?.uid);
     showToast('Registro de enxaqueca salvo com sucesso!');
-
-    // Se não tiver dados climáticos anexados, buscar silenciosamente em background
-    if (!newCrisis.weather) {
-      enrichRecordWithWeather(newCrisis);
-    }
-
     return newCrisis;
   };
 
   const updateCrisis = async (crisis: CrisisRecord): Promise<void> => {
     const now = new Date().toISOString();
-    const timeOfDay = crisis.timeOfDay || getTimeOfDayFromTime(crisis.startTime);
-    
     const updatedRecord: CrisisRecord = {
       ...crisis,
-      timeOfDay,
       updatedAt: now
     };
 
     setCrises(prev => prev.map(c => c.id === crisis.id ? updatedRecord : c).sort((a, b) => b.date.localeCompare(a.date)));
     await saveCrisisToStorage(updatedRecord, user?.uid);
     showToast('Registro atualizado!');
-
-    // Se ainda não tiver clima, buscar em background
-    if (!updatedRecord.weather) {
-      enrichRecordWithWeather(updatedRecord);
-    }
   };
 
   const deleteCrisis = async (id: string): Promise<void> => {

@@ -113,16 +113,9 @@ export const generateMedicalReportPDF = ({
       return `${qtyText}${m.name} ${m.dosage || ''}${reliefText}`;
     }).join('\n') || '-';
 
-    const weatherSummary = c.weather ? (
-      `Clima: ${c.weather.weatherDescription || 'N/I'} (${c.weather.temperature}°C, ${c.weather.pressure} hPa${
-        c.weather.pressureVariation24h !== undefined ? `, delta ${c.weather.pressureVariation24h > 0 ? '+' : ''}${c.weather.pressureVariation24h}hPa` : ''
-      })`
-    ) : '';
-
     const info = [
       c.symptoms?.length ? `Sintomas: ${c.symptoms.join(', ')}` : '',
       c.triggers?.length ? `Gatilhos: ${c.triggers.join(', ')}` : '',
-      weatherSummary,
       c.notes ? `Obs: ${c.notes}` : ''
     ].filter(Boolean).join('\n') || '-';
 
@@ -137,7 +130,7 @@ export const generateMedicalReportPDF = ({
 
   autoTable(doc, {
     startY: currentY,
-    head: [['Data / Hora', 'Tipo', 'Intensidade', 'Medicamentos & Eficácia', 'Sintomas, Clima, Gatilhos e Observações']],
+    head: [['Data', 'Tipo', 'Intensidade', 'Medicamentos & Eficácia', 'Sintomas, Gatilhos e Observações']],
     body: tableData,
     theme: 'grid',
     headStyles: {
@@ -152,7 +145,7 @@ export const generateMedicalReportPDF = ({
       cellPadding: 3,
     },
     columnStyles: {
-      0: { cellWidth: 24 },
+      0: { cellWidth: 22 },
       1: { cellWidth: 20 },
       2: { cellWidth: 20, halign: 'center' },
       3: { cellWidth: 45 },

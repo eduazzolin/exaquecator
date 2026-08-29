@@ -72,26 +72,6 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
                       {crisis.medicationsTaken.map(m => m.name).join(', ')}
                     </span>
                   )}
-
-                  {crisis.weather && (
-                    <span 
-                      className={`text-[10px] px-2 py-0.5 rounded border flex items-center gap-1 font-medium ${
-                        crisis.weather.pressureStatus === 'falling'
-                          ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
-                          : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-muted)]'
-                      }`}
-                      title={`${crisis.weather.weatherDescription || 'Clima'} • Pressão: ${crisis.weather.pressure} hPa ${
-                        crisis.weather.pressureVariation24h !== undefined ? `(${crisis.weather.pressureVariation24h > 0 ? '+' : ''}${crisis.weather.pressureVariation24h} hPa 24h)` : ''
-                      }${crisis.weather.uvIndex !== undefined ? ` • UV: ${crisis.weather.uvIndex}` : ''}${crisis.weather.cityName ? ` • ${crisis.weather.cityName}` : ''}`}
-                    >
-                      <span>{crisis.weather.weatherIcon || '⛅'}</span>
-                      <span>{crisis.weather.temperature}°C</span>
-                      <span>•</span>
-                      <span>{crisis.weather.pressure} hPa</span>
-                      {crisis.weather.pressureStatus === 'falling' && <span className="text-rose-500 font-bold">⬇️</span>}
-                      {crisis.weather.pressureStatus === 'rising' && <span className="text-emerald-500 font-bold">⬆️</span>}
-                    </span>
-                  )}
                 </div>
               </div>
 
