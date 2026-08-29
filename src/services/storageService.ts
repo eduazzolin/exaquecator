@@ -9,11 +9,10 @@ import {
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
 import { CrisisRecord, Medication } from '../types';
-import { generateMockCrises } from '../utils/mockData';
 import { DEFAULT_MEDICATIONS } from '../utils/constants';
 
-const LOCAL_STORAGE_CRISES_KEY = 'enxaquecator_crises_v2';
-const LOCAL_STORAGE_MEDS_KEY = 'enxaquecator_medications_v2';
+const LOCAL_STORAGE_CRISES_KEY = 'enxaquecator_crises_v3';
+const LOCAL_STORAGE_MEDS_KEY = 'enxaquecator_medications_v3';
 
 export const getInitialMedications = (): Medication[] => {
   const stored = localStorage.getItem(LOCAL_STORAGE_MEDS_KEY);
@@ -34,14 +33,10 @@ export const getInitialCrises = (): CrisisRecord[] => {
     try {
       return JSON.parse(stored);
     } catch {
-      const mock = generateMockCrises();
-      localStorage.setItem(LOCAL_STORAGE_CRISES_KEY, JSON.stringify(mock));
-      return mock;
+      return [];
     }
   }
-  const mock = generateMockCrises();
-  localStorage.setItem(LOCAL_STORAGE_CRISES_KEY, JSON.stringify(mock));
-  return mock;
+  return [];
 };
 
 // --- CRISES API ---
@@ -106,11 +101,13 @@ export const fetchMedicationsFromStorage = async (userId?: string | null): Promi
     try {
       const medsRef = collection(db, `users/${userId}/medications`);
       const snapshot = await getDocs(medsRef);
-      const list: Medication[] = [];
-      snapshot.forEach(docSnap => {
-        list.push({ id: docSnap.id, ...docSnap.data() } as Medication);
-      });
-      if (list.length > 0) return list;
+      if (!snapshot.empty) {
+        const list: Medication[] = [];
+        snapshot.forEach(docSnap => {
+          list.push({ id: docSnap.id, ...docSnap.data() } as Medication);
+        });
+        return list;
+      }
     } catch (error) {
       console.error('Error fetching medications from Firestore:', error);
     }
