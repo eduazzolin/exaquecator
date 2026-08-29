@@ -17,13 +17,17 @@ export interface MedicationTaken {
   medicationId?: string;
   name: string;
   dosage: string;
+  quantity?: number; // Quantidade de doses / comprimidos (ex: 1, 2, 3)
   relief?: ReliefLevel;
 }
+
+export type CrisisType = 'presenca' | 'dor' | 'aura';
 
 export interface CrisisRecord {
   id: string;
   userId?: string;
   date: string; // Formato YYYY-MM-DD
+  type?: CrisisType | null; // 'presenca' | 'dor' | 'aura'
   intensity: number | null; // 1 a 10 ou null se não informada
   symptoms?: string[];
   triggers?: string[];

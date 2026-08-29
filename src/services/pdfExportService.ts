@@ -70,7 +70,9 @@ export const generateMedicalReportPDF = ({
     ? (withIntensity.reduce((acc, c) => acc + (c.intensity || 0), 0) / withIntensity.length).toFixed(1)
     : '-';
 
-  const totalMedsTaken = crises.reduce((acc, c) => acc + (c.medicationsTaken?.length || 0), 0);
+  const totalMedsTaken = crises.reduce((acc, c) => {
+    return acc + (c.medicationsTaken?.reduce((mAcc, m) => mAcc + (m.quantity || 1), 0) || 0);
+  }, 0);
 
   currentY += 3;
   doc.setFillColor(248, 250, 252);
@@ -79,26 +81,35 @@ export const generateMedicalReportPDF = ({
 
   doc.setFontSize(9);
   doc.setTextColor(...lightTextColor);
-  doc.text('DIAS COM ENXAQUECA', 25, currentY + 6);
+  doc.text('DIAS REGISTRADOS', 25, currentY + 6);
   doc.text('INTENSIDADE MÉDIA (1-10)', 85, currentY + 6);
-  doc.text('MEDICAMENTOS UTILIZADOS', 150, currentY + 6);
+  doc.text('TOTAL DE DOSES / COMPRIMIDOS', 145, currentY + 6);
 
   doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(...primaryColor);
   doc.text(`${totalDays} dias`, 25, currentY + 15);
   doc.text(avgIntensity !== '-' ? `${avgIntensity} / 10` : 'N/I', 85, currentY + 15);
-  doc.text(`${totalMedsTaken} doses`, 150, currentY + 15);
+  doc.text(`${totalMedsTaken} doses`, 145, currentY + 15);
 
   currentY += 28;
 
   // 4. Detailed Table
+  const typeMap: Record<string, string> = {
+    presenca: 'Presença',
+    dor: 'Dor',
+    aura: 'Aura'
+  };
+
   const tableData = crises.map(c => {
     const formattedDate = formatDateShort(c.date);
+    const typeLabel = c.type ? typeMap[c.type] || c.type : '-';
+    
     const meds = (c.medicationsTaken || []).map(m => {
       const reliefMap = { total: 'Alívio Total', partial: 'Alívio Parcial', none: 'Sem Alívio', unknown: '' };
       const reliefText = m.relief && reliefMap[m.relief] ? ` [${reliefMap[m.relief]}]` : '';
-      return `${m.name} ${m.dosage || ''}${reliefText}`;
+      const qtyText = (m.quantity && m.quantity > 1) ? `${m.quantity}x ` : '';
+      return `${qtyText}${m.name} ${m.dosage || ''}${reliefText}`;
     }).join('\n') || '-';
 
     const info = [
@@ -109,6 +120,7 @@ export const generateMedicalReportPDF = ({
 
     return [
       formattedDate,
+      typeLabel,
       c.intensity !== null ? `${c.intensity}/10` : 'N/I',
       meds,
       info
@@ -117,7 +129,7 @@ export const generateMedicalReportPDF = ({
 
   autoTable(doc, {
     startY: currentY,
-    head: [['Data', 'Intensidade', 'Medicamentos & Eficácia', 'Sintomas, Gatilhos e Observações']],
+    head: [['Data', 'Tipo', 'Intensidade', 'Medicamentos & Eficácia', 'Sintomas, Gatilhos e Observações']],
     body: tableData,
     theme: 'grid',
     headStyles: {
@@ -132,10 +144,11 @@ export const generateMedicalReportPDF = ({
       cellPadding: 3,
     },
     columnStyles: {
-      0: { cellWidth: 25 },
-      1: { cellWidth: 22, halign: 'center' },
-      2: { cellWidth: 50 },
-      3: { cellWidth: 'auto' },
+      0: { cellWidth: 22 },
+      1: { cellWidth: 20 },
+      2: { cellWidth: 20, halign: 'center' },
+      3: { cellWidth: 45 },
+      4: { cellWidth: 'auto' },
     },
     alternateRowStyles: {
       fillColor: [248, 250, 252]

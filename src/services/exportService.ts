@@ -5,6 +5,7 @@ export const exportToCSV = (crises: CrisisRecord[]) => {
   const headers = [
     'ID',
     'Data',
+    'Tipo',
     'Intensidade (1-10)',
     'Medicamentos',
     'Sintomas',
@@ -13,11 +14,15 @@ export const exportToCSV = (crises: CrisisRecord[]) => {
   ];
 
   const rows = crises.map(c => {
-    const meds = (c.medicationsTaken || []).map(m => `${m.name} ${m.dosage || ''} (${m.relief || 'sem info'})`).join('; ');
+    const meds = (c.medicationsTaken || []).map(m => {
+      const qty = (m.quantity && m.quantity > 1) ? `${m.quantity}x ` : '';
+      return `${qty}${m.name} ${m.dosage || ''} (${m.relief || 'sem info'})`;
+    }).join('; ');
     
     return [
       c.id,
       `"${formatDateShort(c.date)}"`,
+      `"${c.type || 'N/I'}"`,
       c.intensity !== null && c.intensity !== undefined ? c.intensity : '""',
       `"${meds}"`,
       `"${(c.symptoms || []).join(', ')}"`,

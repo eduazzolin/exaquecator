@@ -74,7 +74,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               {format(currentMonth, "MMMM 'de' yyyy", { locale: ptBR })}
             </h3>
             <p className="text-[11px] text-slate-400">
-              {daysWithCrisis} {daysWithCrisis === 1 ? 'dia com crise' : 'dias com crise'} • {painFreeDays} dias sem dor
+              {daysWithCrisis} {daysWithCrisis === 1 ? 'dia com registro' : 'dias com registros'} • {painFreeDays} dias livres
             </p>
           </div>
         </div>
@@ -126,6 +126,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             const dayCrises = getCrisesForDay(day);
             const crisis = dayCrises[0];
             const intensity = crisis?.intensity ?? null;
+            const crisisType = crisis?.type ?? null;
             const color = intensity !== null ? getIntensityColor(intensity) : null;
 
             return (
@@ -133,7 +134,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 key={day.toISOString()}
                 onClick={() => {
                   onSelectDate(formattedDayStr);
-                  // Scroll gently to top form if needed
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className={`min-h-[48px] sm:min-h-[58px] p-1 sm:p-1.5 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
@@ -156,6 +156,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   >
                     {format(day, 'd')}
                   </span>
+
+                  {crisisType && (
+                    <span className="text-[10px]" title={`Tipo: ${crisisType}`}>
+                      {crisisType === 'presenca' && '🌫️'}
+                      {crisisType === 'dor' && '💥'}
+                      {crisisType === 'aura' && '✨'}
+                    </span>
+                  )}
                 </div>
 
                 {crisis ? (
@@ -165,8 +173,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       <span>{intensity}/10</span>
                     </div>
                   ) : (
-                    <div className="mt-0.5 p-0.5 rounded-md border border-slate-700 bg-slate-800 text-[10px] text-slate-400 font-medium truncate">
-                      • Crise
+                    <div className="mt-0.5 p-0.5 rounded-md border border-slate-700 bg-slate-800 text-[10px] text-slate-300 font-medium truncate">
+                      {crisisType === 'presenca' ? 'Presença' : crisisType === 'aura' ? 'Aura' : '• Crise'}
                     </div>
                   )
                 ) : (
