@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { CrisisRecord } from '../../types';
-import { getIntensityColor } from '../../utils/constants';
 import { IntensityBadge } from '../common/IntensityBadge';
 import { formatDateFull } from '../../utils/dateUtils';
 import { 
@@ -181,8 +180,31 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               const dayCrises = getCrisesForDay(day);
               const crisis = dayCrises[0];
               const intensity = crisis?.intensity ?? null;
-              const crisisType = crisis?.type ?? null;
-              const color = intensity !== null ? getIntensityColor(intensity) : null;
+              const crisisType = crisis?.type ?? (crisis ? 'dor' : null);
+
+              // Background cell fill color based on type
+              let cellBgColor = 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-secondary)]';
+              let typeBadge = null;
+
+              if (crisis) {
+                if (crisisType === 'presenca') {
+                  cellBgColor = 'bg-sky-500/20 dark:bg-sky-500/25 border-sky-500/40 text-sky-900 dark:text-sky-100 font-medium';
+                  typeBadge = '🌫️';
+                } else if (crisisType === 'aura') {
+                  cellBgColor = 'bg-violet-500/20 dark:bg-violet-500/25 border-violet-500/40 text-violet-900 dark:text-violet-100 font-medium';
+                  typeBadge = '✨';
+                } else {
+                  // Default to dor (color intensity tint)
+                  if (intensity !== null && intensity >= 8) {
+                    cellBgColor = 'bg-rose-500/25 dark:bg-rose-500/30 border-rose-500/50 text-rose-950 dark:text-rose-100 font-medium';
+                  } else if (intensity !== null && intensity >= 5) {
+                    cellBgColor = 'bg-orange-500/25 dark:bg-orange-500/30 border-orange-500/50 text-orange-950 dark:text-orange-100 font-medium';
+                  } else {
+                    cellBgColor = 'bg-amber-500/25 dark:bg-amber-500/30 border-amber-500/50 text-amber-950 dark:text-amber-100 font-medium';
+                  }
+                  typeBadge = '💥';
+                }
+              }
 
               return (
                 <button
@@ -192,51 +214,68 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   }}
                   className={`min-h-[48px] sm:min-h-[56px] p-1 sm:p-1.5 rounded-md border text-left transition-all relative flex flex-col justify-between ${
                     !isCurrentMonthDay
-                      ? 'opacity-20 border-transparent bg-transparent'
+                      ? 'opacity-20 border-transparent bg-transparent pointer-events-none'
                       : isSelected
-                      ? 'border-[var(--color-primary)] bg-[var(--bg-secondary)] ring-1 ring-[var(--color-primary)] shadow-sm'
-                      : 'border-[var(--card-border)] bg-[var(--card-bg)] hover:bg-[var(--bg-secondary)] hover:border-[var(--card-border-hover)]'
+                      ? `${cellBgColor} ring-2 ring-[var(--color-primary)] shadow-md z-10 scale-[1.02]`
+                      : `${cellBgColor} hover:border-[var(--card-border-hover)] hover:opacity-90`
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between w-full">
                     <span
-                      className={`text-xs rounded w-5 h-5 flex items-center justify-center font-medium ${
+                      className={`text-xs rounded w-5 h-5 flex items-center justify-center font-semibold ${
                         isToday
-                          ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] font-bold'
+                          ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] shadow-sm'
                           : isSelected
                           ? 'text-[var(--text-primary)] font-bold'
-                          : 'text-[var(--text-secondary)]'
+                          : ''
                       }`}
                     >
                       {format(day, 'd')}
                     </span>
 
-                    {crisisType && (
-                      <span className="text-[10px]" title={`Tipo: ${crisisType}`}>
-                        {crisisType === 'presenca' && '🌫️'}
-                        {crisisType === 'dor' && '💥'}
-                        {crisisType === 'aura' && '✨'}
+                    {typeBadge && (
+                      <span className="text-[11px]" title={`Tipo: ${crisisType}`}>
+                        {typeBadge}
                       </span>
                     )}
                   </div>
 
                   {crisis ? (
-                    intensity !== null ? (
-                      <div className={`mt-0.5 px-1 py-0.5 rounded border text-[9px] sm:text-[10px] font-semibold truncate flex items-center gap-1 ${color?.bg} ${color?.text} ${color?.border}`}>
-                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
-                        <span>{intensity}/10</span>
-                      </div>
-                    ) : (
-                      <div className="mt-0.5 px-1 py-0.5 rounded border border-[var(--card-border)] bg-[var(--bg-secondary)] text-[9px] sm:text-[10px] text-[var(--text-muted)] font-medium truncate">
-                        {crisisType === 'presenca' ? 'Presença' : crisisType === 'aura' ? 'Aura' : '• Crise'}
-                      </div>
-                    )
+                    <div className="mt-0.5 flex items-center justify-between text-[10px] font-semibold">
+                      {intensity !== null ? (
+                        <span className="px-1 py-0.2 rounded bg-black/10 dark:bg-white/10">
+                          {intensity}/10
+                        </span>
+                      ) : (
+                        <span className="capitalize opacity-80">{crisisType || 'Crise'}</span>
+                      )}
+                    </div>
                   ) : (
                     <div className="h-2" />
                   )}
                 </button>
               );
             })}
+          </div>
+
+          {/* Color Legend */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-4 mt-2 border-t border-[var(--card-border)] text-xs text-[var(--text-muted)]">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-sky-500/25 border border-sky-500/50" />
+              <span>🌫️ Presença</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-orange-500/25 border border-orange-500/50" />
+              <span>💥 Dor</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-violet-500/25 border border-violet-500/50" />
+              <span>✨ Aura</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-[var(--card-bg)] border border-[var(--card-border)]" />
+              <span>⚪ Sem Registro</span>
+            </div>
           </div>
         </div>
 

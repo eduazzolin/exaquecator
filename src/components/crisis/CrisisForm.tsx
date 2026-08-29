@@ -5,7 +5,7 @@ import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor } from '../../utils
 import { formatDateFull } from '../../utils/dateUtils';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
-import { Plus, Minus, Pill, Save, Check, X, Clock } from 'lucide-react';
+import { Plus, Minus, Pill, Save, Check, X, Clock, Trash2, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface CrisisFormProps {
   selectedDate: string;
@@ -22,13 +22,14 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   const existingCrisis = crises.find(c => c.date === selectedDate);
 
   const [startTime, setStartTime] = useState<string>('');
-  const [type, setType] = useState<CrisisType | null>(null);
-  const [intensity, setIntensity] = useState<number | null>(null);
+  const [type, setType] = useState<CrisisType | null>('dor');
+  const [intensity, setIntensity] = useState<number | null>(5);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [triggers, setTriggers] = useState<string[]>([]);
   const [medicationsTaken, setMedicationsTaken] = useState<MedicationTaken[]>([]);
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Custom med input state
   const [isAddingCustomMed, setIsAddingCustomMed] = useState(false);
@@ -39,37 +40,33 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   useEffect(() => {
     if (existingCrisis) {
       setStartTime(existingCrisis.startTime || '');
-      setType(existingCrisis.type ?? null);
-      setIntensity(existingCrisis.intensity ?? null);
+      setType(existingCrisis.type ?? 'dor');
+      setIntensity(existingCrisis.intensity ?? 5);
       setSymptoms(existingCrisis.symptoms || []);
       setTriggers(existingCrisis.triggers || []);
       setMedicationsTaken(existingCrisis.medicationsTaken || []);
       setNotes(existingCrisis.notes || '');
+      if (existingCrisis.notes || (existingCrisis.triggers && existingCrisis.triggers.length > 0) || (existingCrisis.symptoms && existingCrisis.symptoms.length > 0)) {
+        setShowAdvanced(true);
+      }
     } else {
       setStartTime('');
-      setType(null);
-      setIntensity(null);
+      setType('dor');
+      setIntensity(5);
       setSymptoms([]);
       setTriggers([]);
       setMedicationsTaken([]);
       setNotes('');
+      setShowAdvanced(false);
     }
   }, [selectedDate, existingCrisis]);
 
   const handleTypeClick = (selectedType: CrisisType) => {
-    if (type === selectedType) {
-      setType(null);
-    } else {
-      setType(selectedType);
-    }
+    setType(type === selectedType ? null : selectedType);
   };
 
   const handleIntensityClick = (num: number) => {
-    if (intensity === num) {
-      setIntensity(null);
-    } else {
-      setIntensity(num);
-    }
+    setIntensity(intensity === num ? null : num);
   };
 
   // Toggle medication from catalog buttons
@@ -168,17 +165,25 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
     }
   };
 
+  const handleMarkPainFree = async () => {
+    if (existingCrisis) {
+      if (window.confirm('Marcar este dia como "Sem Dor" (remover registro)?')) {
+        await deleteCrisis(existingCrisis.id);
+      }
+    }
+  };
+
   const currentColor = intensity !== null ? getIntensityColor(intensity) : null;
 
   return (
-    <div className="glass p-4 sm:p-6 space-y-5">
+    <div className="glass p-5 sm:p-6 space-y-5">
       
-      {/* Top Header: Mini Calendar Picker, Start Time & Status */}
+      {/* Top Header: Date, Time & Quick Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--card-border)]">
         <div className="flex flex-wrap items-center gap-3 sm:gap-4">
           <div>
             <label className="form-label">
-              Data do Registro
+              Data Selecionada
             </label>
             <MiniDatePicker
               value={selectedDate}
@@ -189,7 +194,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           <div>
             <label className="form-label flex items-center gap-1">
               <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
-              Hora de Início <span className="text-[var(--text-muted)] font-normal lowercase">(opcional)</span>
+              Hora de Início
             </label>
             <div className="flex items-center gap-1.5">
               <input
@@ -212,39 +217,41 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           </div>
         </div>
 
-        <div>
+        <div className="flex items-center gap-2 self-start sm:self-center">
           {existingCrisis ? (
-            <span className="badge bg-[rgba(16,185,129,0.1)] text-[var(--color-above)] border border-[rgba(16,185,129,0.2)]">
-              <Check className="w-3 h-3" /> Dia Registrado (Edição)
-            </span>
+            <>
+              <span className="badge bg-emerald-500/10 text-[var(--color-above)] border border-emerald-500/20">
+                <Check className="w-3 h-3" /> Dia Registrado
+              </span>
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="p-1.5 rounded-md border border-rose-500/20 bg-rose-500/10 text-[var(--color-below)] hover:bg-rose-500/20 transition-colors"
+                title="Excluir registro deste dia"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </>
           ) : (
-            <span className="text-xs text-[var(--text-muted)]">
-              Nenhum registro salvo neste dia
-            </span>
+            <button
+              type="button"
+              onClick={handleMarkPainFree}
+              className="badge bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+            >
+              <CheckCircle2 className="w-3 h-3" /> Dia Livre de Dor
+            </button>
           )}
         </div>
       </div>
 
-      {/* Main Form */}
-      <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Main Fast Form */}
+      <form onSubmit={handleSubmit} className="space-y-4">
         
-        {/* 1. TIPO (Presença, Dor, Aura) */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="form-label mb-0">
-              Tipo do Episódio
-            </label>
-            {type && (
-              <button
-                type="button"
-                onClick={() => setType(null)}
-                className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-              >
-                (Limpar)
-              </button>
-            )}
-          </div>
-
+        {/* 1. TIPO DO EPISÓDIO */}
+        <div className="space-y-1.5">
+          <label className="form-label mb-0">
+            Tipo do Episódio
+          </label>
           <div className="grid grid-cols-3 gap-2">
             {[
               { id: 'presenca' as CrisisType, label: 'Presença', emoji: '🌫️', desc: 'Sensação / Pródromo' },
@@ -257,49 +264,33 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   key={opt.id}
                   type="button"
                   onClick={() => handleTypeClick(opt.id)}
-                  className={`p-3 rounded-md border text-left transition-all flex flex-col justify-between ${
+                  className={`py-2.5 px-3 rounded-md border text-left transition-all flex items-center justify-between gap-2 ${
                     isSelected
                       ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] shadow-sm'
                       : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)]'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
                     <span className="text-base">{opt.emoji}</span>
-                    {isSelected && <Check className="w-3.5 h-3.5" />}
+                    <span className="text-xs font-semibold">{opt.label}</span>
                   </div>
-                  <div className="mt-1.5">
-                    <p className="text-xs font-semibold">
-                      {opt.label}
-                    </p>
-                    <p className={`text-[10px] truncate hidden sm:block ${isSelected ? 'opacity-80' : 'text-[var(--text-muted)]'}`}>
-                      {opt.desc}
-                    </p>
-                  </div>
+                  {isSelected && <Check className="w-3.5 h-3.5" />}
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* 2. INTENSIDADE (1 to 10 or Null) */}
-        <div className="space-y-2">
+        {/* 2. ESCALA DE INTENSIDADE */}
+        <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <label className="form-label mb-0">
               Intensidade da Dor
             </label>
             {intensity !== null ? (
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
-                  {intensity}/10 • {currentColor?.label}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setIntensity(null)}
-                  className="text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                >
-                  (Limpar)
-                </button>
-              </div>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
+                {intensity}/10 • {currentColor?.label}
+              </span>
             ) : (
               <span className="text-xs text-[var(--text-muted)]">Não informada</span>
             )}
@@ -313,10 +304,10 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   key={num}
                   type="button"
                   onClick={() => handleIntensityClick(num)}
-                  className={`h-8 sm:h-9 rounded-md text-xs font-semibold transition-all ${
+                  className={`h-9 rounded-md text-xs font-semibold transition-all ${
                     isSelected
-                      ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-sm'
-                      : 'bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)]'
+                      ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-sm scale-105'
+                      : 'bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
                   }`}
                 >
                   {num}
@@ -326,22 +317,14 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           </div>
         </div>
 
-        {/* 3. MEDICAMENTOS (Com Seletor de Quantidade) */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="form-label mb-0 flex items-center gap-1.5">
-              <Pill className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-              Medicamentos Tomados
-            </label>
-            {medicationsTaken.length > 0 && (
-              <span className="text-xs text-[var(--text-secondary)] font-medium">
-                {medicationsTaken.length} selecionado{medicationsTaken.length > 1 ? 's' : ''}
-              </span>
-            )}
-          </div>
+        {/* 3. MEDICAMENTOS TOMADOS (1-Tap Toggle) */}
+        <div className="space-y-1.5">
+          <label className="form-label mb-0 flex items-center gap-1.5">
+            <Pill className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+            Remédios Tomados
+          </label>
 
-          {/* Catalog Medication Chips */}
-          <div className="flex flex-wrap gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap gap-1.5">
             {medications.map(med => {
               const isSelected = medicationsTaken.some(m => m.name.toLowerCase() === med.name.toLowerCase());
               return (
@@ -349,203 +332,170 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   key={med.id}
                   type="button"
                   onClick={() => toggleMedication(med.name, med.dosage, med.id)}
-                  className={`text-xs sm:text-sm px-3 py-1.5 rounded-md border transition-all flex items-center gap-1.5 ${
+                  className={`text-xs px-2.5 py-1.5 rounded-md border transition-all flex items-center gap-1.5 ${
                     isSelected
                       ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] font-medium shadow-sm'
-                      : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)]'
+                      : 'bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                   }`}
                 >
                   <span>💊 {med.name}</span>
-                  {med.dosage && (
-                    <span className="text-[11px] opacity-75">({med.dosage})</span>
-                  )}
-                  {isSelected && <Check className="w-3.5 h-3.5" />}
+                  {med.dosage && <span className="text-[10px] opacity-75">({med.dosage})</span>}
+                  {isSelected && <Check className="w-3 h-3" />}
                 </button>
               );
             })}
 
-            {/* Custom Extra Meds */}
-            {medicationsTaken
-              .filter(m => !medications.some(cat => cat.name.toLowerCase() === m.name.toLowerCase()))
-              .map((customMed, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => toggleMedication(customMed.name, customMed.dosage)}
-                  className="text-xs sm:text-sm px-3 py-1.5 rounded-md border bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] font-medium flex items-center gap-1.5 shadow-sm"
-                >
-                  <span>💊 {customMed.name}</span>
-                  {customMed.dosage && <span className="text-[11px] opacity-75">({customMed.dosage})</span>}
-                  <Check className="w-3.5 h-3.5" />
-                </button>
-              ))}
-
-            {/* Add Custom Button */}
             {!isAddingCustomMed ? (
               <button
                 type="button"
                 onClick={() => setIsAddingCustomMed(true)}
-                className="text-xs sm:text-sm px-3 py-1.5 rounded-md border border-dashed border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)] transition-all flex items-center gap-1"
+                className="text-xs px-2.5 py-1.5 rounded-md border border-dashed border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Outro medicamento</span>
+                <Plus className="w-3 h-3" />
+                <span>Outro remédio</span>
               </button>
             ) : (
-              <div className="flex items-center gap-1.5 flex-wrap">
+              <div className="flex items-center gap-1 flex-wrap">
                 <input
                   type="text"
                   placeholder="Nome do remédio"
                   value={customMedName}
                   onChange={e => setCustomMedName(e.target.value)}
                   autoFocus
-                  className="px-2.5 py-1 rounded-md bg-[var(--card-bg)] border border-[var(--card-border-hover)] text-xs text-[var(--text-primary)] outline-none w-36"
+                  className="input-field text-xs py-1 px-2 w-32 h-[30px]"
                 />
                 <input
                   type="text"
-                  placeholder="Dose (ex: 50mg)"
+                  placeholder="Dose"
                   value={customMedDosage}
                   onChange={e => setCustomMedDosage(e.target.value)}
-                  className="px-2.5 py-1 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-primary)] outline-none w-24"
+                  className="input-field text-xs py-1 px-2 w-20 h-[30px]"
                 />
                 <button
                   type="button"
                   onClick={() => handleAddCustomMed()}
-                  className="px-2.5 py-1 rounded-md bg-[var(--color-primary)] text-[var(--bg-primary)] text-xs font-semibold hover:opacity-90 transition-opacity"
+                  className="btn btn-primary text-xs py-1 px-2 h-[30px]"
                 >
                   Adicionar
                 </button>
                 <button
                   type="button"
-                  onClick={() => { setIsAddingCustomMed(false); setCustomMedName(''); setCustomMedDosage(''); }}
-                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+                  onClick={() => setIsAddingCustomMed(false)}
+                  className="p-1 text-[var(--text-muted)]"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-3.5 h-3.5" />
                 </button>
               </div>
             )}
           </div>
 
-          {/* Detailed Selected Meds List with Quantity & Relief */}
+          {/* Doses & Alívio dos selecionados */}
           {medicationsTaken.length > 0 && (
-            <div className="pt-2 space-y-2">
-              <span className="text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider">
-                Doses e eficácia:
-              </span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {medicationsTaken.map((m, idx) => (
-                  <div 
-                    key={idx} 
-                    className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] flex flex-col gap-2"
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-semibold text-[var(--text-primary)] truncate">
-                        💊 {m.name} {m.dosage ? `(${m.dosage})` : ''}
-                      </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              {medicationsTaken.map((m, idx) => (
+                <div key={idx} className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] flex items-center justify-between gap-2">
+                  <div className="truncate">
+                    <p className="text-xs font-semibold text-[var(--text-primary)] truncate">💊 {m.name}</p>
+                    <p className="text-[10px] text-[var(--text-muted)]">{m.dosage || 'Dose padrão'}</p>
+                  </div>
+
+                  <div className="flex items-center gap-1.5">
+                    <div className="flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] px-1 rounded">
                       <button
                         type="button"
-                        onClick={() => handleRemoveMed(idx)}
-                        className="text-[var(--text-muted)] hover:text-[var(--color-below)] p-0.5 transition-colors"
-                        title="Remover"
+                        onClick={() => handleUpdateMedQuantity(idx, -1)}
+                        className="w-4 h-4 rounded text-xs flex items-center justify-center hover:bg-[var(--bg-secondary)]"
                       >
-                        <X className="w-3.5 h-3.5" />
+                        <Minus className="w-2.5 h-2.5" />
+                      </button>
+                      <span className="text-xs font-semibold w-3 text-center">{m.quantity || 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleUpdateMedQuantity(idx, 1)}
+                        className="w-4 h-4 rounded text-xs flex items-center justify-center hover:bg-[var(--bg-secondary)]"
+                      >
+                        <Plus className="w-2.5 h-2.5" />
                       </button>
                     </div>
 
-                    <div className="flex items-center justify-between gap-2">
-                      {/* Quantity Selector */}
-                      <div className="flex items-center gap-1.5 bg-[var(--card-bg)] border border-[var(--card-border)] px-1.5 py-1 rounded-md">
-                        <span className="text-[10px] text-[var(--text-muted)] font-medium mr-0.5">Qtd:</span>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateMedQuantity(idx, -1)}
-                          className="w-5 h-5 rounded bg-[var(--bg-secondary)] hover:bg-[var(--card-border)] text-[var(--text-primary)] flex items-center justify-center text-xs transition-colors"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="text-xs font-semibold text-[var(--text-primary)] w-4 text-center">
-                          {m.quantity || 1}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateMedQuantity(idx, 1)}
-                          className="w-5 h-5 rounded bg-[var(--bg-secondary)] hover:bg-[var(--card-border)] text-[var(--text-primary)] flex items-center justify-center text-xs transition-colors"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
-                      </div>
+                    <select
+                      value={m.relief || 'total'}
+                      onChange={e => handleUpdateMedRelief(idx, e.target.value as ReliefLevel)}
+                      className="text-[11px] py-1 px-1.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)] outline-none"
+                    >
+                      <option value="total">🌟 Total</option>
+                      <option value="partial">⚖️ Parcial</option>
+                      <option value="none">❌ Sem alívio</option>
+                    </select>
 
-                      {/* Relief Selector */}
-                      <select
-                        value={m.relief || 'total'}
-                        onChange={e => handleUpdateMedRelief(idx, e.target.value as ReliefLevel)}
-                        className="px-2 py-1 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-primary)] outline-none flex-1"
-                      >
-                        <option value="total">🌟 Alívio Total</option>
-                        <option value="partial">⚖️ Alívio Parcial</option>
-                        <option value="none">❌ Sem Alívio</option>
-                      </select>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveMed(idx)}
+                      className="p-1 text-[var(--text-muted)] hover:text-[var(--color-below)]"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                ))}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* 4. EXPANSOR PARA SINTOMAS, GATILHOS E NOTAS */}
+        <div className="border-t border-[var(--card-border)] pt-2">
+          <button
+            type="button"
+            onClick={() => setShowAdvanced(!showAdvanced)}
+            className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1 py-1"
+          >
+            <span>{showAdvanced ? 'Ocultar Sintomas, Gatilhos e Observações' : '+ Adicionar Sintomas, Gatilhos e Observações'}</span>
+            {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+          </button>
+
+          {showAdvanced && (
+            <div className="space-y-3 pt-3 animate-in">
+              <TagPicker
+                label="Sintomas"
+                options={COMMON_SYMPTOMS}
+                selected={symptoms}
+                onChange={setSymptoms}
+                placeholderCustom="Outro sintoma..."
+              />
+
+              <TagPicker
+                label="Gatilhos"
+                options={COMMON_TRIGGERS}
+                selected={triggers}
+                onChange={setTriggers}
+                placeholderCustom="Outro gatilho..."
+              />
+
+              <div>
+                <label className="form-label">
+                  Observações
+                </label>
+                <textarea
+                  rows={2}
+                  value={notes}
+                  onChange={e => setNotes(e.target.value)}
+                  placeholder="Notas adicionais sobre o episódio..."
+                  className="input-field text-xs resize-none"
+                />
               </div>
             </div>
           )}
         </div>
 
-        {/* 4. SINTOMAS & GATILHOS */}
-        <div className="space-y-3 pt-1">
-          <TagPicker
-            label="Sintomas"
-            options={COMMON_SYMPTOMS}
-            selected={symptoms}
-            onChange={setSymptoms}
-            placeholderCustom="Outro sintoma..."
-          />
-
-          <TagPicker
-            label="Gatilhos"
-            options={COMMON_TRIGGERS}
-            selected={triggers}
-            onChange={setTriggers}
-            placeholderCustom="Outro gatilho..."
-          />
-        </div>
-
-        {/* 5. OBSERVAÇÕES */}
-        <div className="space-y-1">
-          <label className="form-label mb-0">
-            Observações (Opcional)
-          </label>
-          <textarea
-            rows={2}
-            value={notes}
-            onChange={e => setNotes(e.target.value)}
-            placeholder="Anotações adicionais do dia..."
-            className="input-field resize-none text-xs"
-          />
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between gap-3 pt-2">
-          {existingCrisis ? (
-            <button
-              type="button"
-              onClick={handleDelete}
-              className="btn btn-danger text-xs py-2 px-3"
-            >
-              Excluir Registro
-            </button>
-          ) : (
-            <div />
-          )}
-
+        {/* 5. BARRA DE SALVAR */}
+        <div className="pt-2 flex items-center justify-end gap-2">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn btn-primary text-xs py-2 px-4 shadow-sm"
+            className="btn btn-primary text-xs py-2.5 px-5 shadow-sm font-semibold"
           >
             <Save className="w-3.5 h-3.5" />
-            <span>{isSubmitting ? 'Salvando...' : (existingCrisis ? 'Atualizar Registro' : 'Salvar Registro do Dia')}</span>
+            <span>{isSubmitting ? 'Salvando...' : (existingCrisis ? 'Atualizar Registro' : 'Salvar Registro')}</span>
           </button>
         </div>
 
