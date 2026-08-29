@@ -32,9 +32,14 @@ jobs:
         run: npm run build
 
       - name: Deploy to Firebase Hosting
+        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENXAQUECATOR != '' }}
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENXAQUECATOR }}'
           channelId: live
-          projectId: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
+          projectId: ${{ secrets.VITE_FIREBASE_PROJECT_ID || 'enxaquecator' }}
+
+      - name: Service Account Notice
+        if: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENXAQUECATOR == '' }}
+        run: echo "Build concluido com sucesso! Para habilitar o deploy automatico, adicione o secret FIREBASE_SERVICE_ACCOUNT_ENXAQUECATOR no GitHub Secrets."
