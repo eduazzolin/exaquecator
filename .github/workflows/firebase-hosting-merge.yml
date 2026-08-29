@@ -31,24 +31,11 @@ jobs:
           VITE_FIREBASE_APP_ID: ${{ secrets.VITE_FIREBASE_APP_ID }}
         run: npm run build
 
-      # Opção 1: Deploy com Service Account
-      - name: Deploy with Service Account
-        if: ${{ env.SERVICE_ACCOUNT != '' }}
+      - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
-        env:
-          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENXAQUECATOR }}
         with:
           repoToken: '${{ secrets.GITHUB_TOKEN }}'
           firebaseServiceAccount: '${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENXAQUECATOR }}'
           channelId: live
           projectId: enxaquecator
 
-      # Opção 2: Deploy com FIREBASE_TOKEN
-      - name: Deploy with Firebase Token
-        if: ${{ env.FIREBASE_TOKEN != '' && env.SERVICE_ACCOUNT == '' }}
-        uses: w9jds/firebase-action@master
-        with:
-          args: deploy --only hosting
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-          SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_ENXAQUECATOR }}
