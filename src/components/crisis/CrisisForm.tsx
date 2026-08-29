@@ -5,7 +5,7 @@ import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor } from '../../utils
 import { formatDateFull } from '../../utils/dateUtils';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
-import { Plus, Minus, Pill, Save, Check, X } from 'lucide-react';
+import { Plus, Minus, Pill, Save, Check, X, Clock } from 'lucide-react';
 
 interface CrisisFormProps {
   selectedDate: string;
@@ -21,6 +21,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   // Find if there is an existing record for the selected date
   const existingCrisis = crises.find(c => c.date === selectedDate);
 
+  const [startTime, setStartTime] = useState<string>('');
   const [type, setType] = useState<CrisisType | null>(null);
   const [intensity, setIntensity] = useState<number | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>([]);
@@ -37,6 +38,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   // Sync form whenever selectedDate or crises list changes
   useEffect(() => {
     if (existingCrisis) {
+      setStartTime(existingCrisis.startTime || '');
       setType(existingCrisis.type ?? null);
       setIntensity(existingCrisis.intensity ?? null);
       setSymptoms(existingCrisis.symptoms || []);
@@ -44,6 +46,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
       setMedicationsTaken(existingCrisis.medicationsTaken || []);
       setNotes(existingCrisis.notes || '');
     } else {
+      setStartTime('');
       setType(null);
       setIntensity(null);
       setSymptoms([]);
@@ -131,6 +134,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
     try {
       const recordData = {
         date: selectedDate,
+        startTime: startTime.trim() || undefined,
         type,
         intensity,
         symptoms,
@@ -169,17 +173,44 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   return (
     <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
       
-      {/* Top Header: Mini Calendar Picker & Status */}
+      {/* Top Header: Mini Calendar Picker, Start Time & Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800/80">
-        <div className="space-y-1">
-          <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-            Data do Registro
-          </label>
-          <div>
-            <MiniDatePicker
-              value={selectedDate}
-              onChange={onDateChange}
-            />
+        <div className="flex flex-wrap items-center gap-3 sm:gap-5">
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Data do Registro
+            </label>
+            <div>
+              <MiniDatePicker
+                value={selectedDate}
+                onChange={onDateChange}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+              <Clock className="w-3 h-3 text-violet-400" />
+              Hora de Início <span className="text-slate-500 font-normal lowercase">(opcional)</span>
+            </label>
+            <div className="flex items-center gap-1.5">
+              <input
+                type="time"
+                value={startTime}
+                onChange={e => setStartTime(e.target.value)}
+                className="px-2.5 py-1.5 h-[38px] rounded-xl bg-slate-950 border border-slate-800 text-xs text-white outline-none focus:border-violet-500 transition-colors [color-scheme:dark]"
+              />
+              {startTime && (
+                <button
+                  type="button"
+                  onClick={() => setStartTime('')}
+                  className="p-1 rounded-lg text-slate-500 hover:text-slate-300 transition-colors"
+                  title="Limpar horário"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
         </div>
 

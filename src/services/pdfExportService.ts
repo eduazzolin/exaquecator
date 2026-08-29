@@ -102,7 +102,8 @@ export const generateMedicalReportPDF = ({
   };
 
   const tableData = crises.map(c => {
-    const formattedDate = formatDateShort(c.date);
+    const dateText = formatDateShort(c.date);
+    const formattedDate = c.startTime ? `${dateText}\nàs ${c.startTime}` : dateText;
     const typeLabel = c.type ? typeMap[c.type] || c.type : '-';
     
     const meds = (c.medicationsTaken || []).map(m => {

@@ -5,6 +5,7 @@ export const exportToCSV = (crises: CrisisRecord[]) => {
   const headers = [
     'ID',
     'Data',
+    'Hora de Início',
     'Tipo',
     'Intensidade (1-10)',
     'Medicamentos',
@@ -22,6 +23,7 @@ export const exportToCSV = (crises: CrisisRecord[]) => {
     return [
       c.id,
       `"${formatDateShort(c.date)}"`,
+      `"${c.startTime || ''}"`,
       `"${c.type || 'N/I'}"`,
       c.intensity !== null && c.intensity !== undefined ? c.intensity : '""',
       `"${meds}"`,

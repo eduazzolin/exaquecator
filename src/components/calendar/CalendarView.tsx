@@ -14,7 +14,8 @@ import {
   Sparkles,
   AlertTriangle,
   FileText,
-  CheckCircle2
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 import { 
   startOfMonth, 
@@ -263,8 +264,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         {selectedCrisis ? (
           <div className="space-y-3">
             
-            {/* Type and Intensity Badges */}
+            {/* Type, Intensity, and Start Time Badges */}
             <div className="flex flex-wrap items-center gap-2">
+              {selectedCrisis.startTime && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-800 border border-slate-700 text-slate-200">
+                  <Clock className="w-3.5 h-3.5 text-violet-400" />
+                  Início às {selectedCrisis.startTime}
+                </span>
+              )}
+
               {selectedCrisis.type && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-violet-950/80 border border-violet-800/60 text-violet-200">
                   {selectedCrisis.type === 'presenca' && '🌫️ Presença'}
