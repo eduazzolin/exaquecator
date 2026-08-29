@@ -206,6 +206,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 }
               }
 
+              const hasMedications = Boolean(crisis?.medicationsTaken && crisis.medicationsTaken.length > 0);
+              const totalMedsCount = crisis?.medicationsTaken ? crisis.medicationsTaken.reduce((acc, m) => acc + (m.quantity || 1), 0) : 0;
+
               return (
                 <button
                   key={day.toISOString()}
@@ -233,11 +236,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                       {format(day, 'd')}
                     </span>
 
-                    {typeBadge && (
-                      <span className="text-[11px]" title={`Tipo: ${crisisType}`}>
-                        {typeBadge}
-                      </span>
-                    )}
+                    <div className="flex items-center gap-0.5">
+                      {hasMedications && (
+                        <span className="text-[10px]" title={`Remédios tomados: ${totalMedsCount} dose(s)`}>
+                          💊
+                        </span>
+                      )}
+                      {typeBadge && (
+                        <span className="text-[11px]" title={`Tipo: ${crisisType}`}>
+                          {typeBadge}
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {crisis ? (
@@ -248,6 +258,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                         </span>
                       ) : (
                         <span className="capitalize opacity-80">{crisisType || 'Crise'}</span>
+                      )}
+
+                      {hasMedications && totalMedsCount > 1 && (
+                        <span className="text-[9px] opacity-75 font-mono">
+                          {totalMedsCount}x
+                        </span>
                       )}
                     </div>
                   ) : (
@@ -271,6 +287,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded bg-violet-500/25 border border-violet-500/50" />
               <span>✨ Aura</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span>💊</span>
+              <span>Remédio Tomado</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded bg-[var(--card-bg)] border border-[var(--card-border)]" />

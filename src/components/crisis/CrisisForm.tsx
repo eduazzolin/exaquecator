@@ -22,8 +22,8 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   const existingCrisis = crises.find(c => c.date === selectedDate);
 
   const [startTime, setStartTime] = useState<string>('');
-  const [type, setType] = useState<CrisisType | null>('dor');
-  const [intensity, setIntensity] = useState<number | null>(5);
+  const [type, setType] = useState<CrisisType | null>('presenca');
+  const [intensity, setIntensity] = useState<number | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [triggers, setTriggers] = useState<string[]>([]);
   const [medicationsTaken, setMedicationsTaken] = useState<MedicationTaken[]>([]);
@@ -40,19 +40,19 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   useEffect(() => {
     if (existingCrisis) {
       setStartTime(existingCrisis.startTime || '');
-      setType(existingCrisis.type ?? 'dor');
-      setIntensity(existingCrisis.intensity ?? 5);
+      setType(existingCrisis.type ?? 'presenca');
+      setIntensity(existingCrisis.intensity ?? null);
       setSymptoms(existingCrisis.symptoms || []);
       setTriggers(existingCrisis.triggers || []);
       setMedicationsTaken(existingCrisis.medicationsTaken || []);
       setNotes(existingCrisis.notes || '');
-      if (existingCrisis.notes || (existingCrisis.triggers && existingCrisis.triggers.length > 0) || (existingCrisis.symptoms && existingCrisis.symptoms.length > 0)) {
+      if (existingCrisis.notes || (existingCrisis.triggers && existingCrisis.triggers.length > 0) || (existingCrisis.symptoms && existingCrisis.symptoms.length > 0) || existingCrisis.intensity !== null) {
         setShowAdvanced(true);
       }
     } else {
       setStartTime('');
-      setType('dor');
-      setIntensity(5);
+      setType('presenca');
+      setIntensity(null);
       setSymptoms([]);
       setTriggers([]);
       setMedicationsTaken([]);
@@ -281,43 +281,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           </div>
         </div>
 
-        {/* 2. ESCALA DE INTENSIDADE */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between">
-            <label className="form-label mb-0">
-              Intensidade da Dor
-            </label>
-            {intensity !== null ? (
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
-                {intensity}/10 • {currentColor?.label}
-              </span>
-            ) : (
-              <span className="text-xs text-[var(--text-muted)]">Não informada</span>
-            )}
-          </div>
-
-          <div className="grid grid-cols-10 gap-1 sm:gap-1.5">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => {
-              const isSelected = intensity === num;
-              return (
-                <button
-                  key={num}
-                  type="button"
-                  onClick={() => handleIntensityClick(num)}
-                  className={`h-9 rounded-md text-xs font-semibold transition-all ${
-                    isSelected
-                      ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-sm scale-105'
-                      : 'bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
-                  }`}
-                >
-                  {num}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* 3. MEDICAMENTOS TOMADOS (1-Tap Toggle) */}
+        {/* 2. MEDICAMENTOS TOMADOS (1-Tap Toggle) */}
         <div className="space-y-1.5">
           <label className="form-label mb-0 flex items-center gap-1.5">
             <Pill className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
@@ -442,19 +406,60 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           )}
         </div>
 
-        {/* 4. EXPANSOR PARA SINTOMAS, GATILHOS E NOTAS */}
+        {/* 3. EXPANSOR: INTENSIDADE, SINTOMAS, GATILHOS E NOTAS */}
         <div className="border-t border-[var(--card-border)] pt-2">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1 py-1"
+            className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1.5 py-1"
           >
-            <span>{showAdvanced ? 'Ocultar Sintomas, Gatilhos e Observações' : '+ Adicionar Sintomas, Gatilhos e Observações'}</span>
+            <span>
+              {showAdvanced
+                ? 'Ocultar Intensidade, Sintomas, Gatilhos e Notas'
+                : `+ Adicionar Intensidade${intensity !== null ? ` (${intensity}/10)` : ''}, Sintomas, Gatilhos e Notas`}
+            </span>
             {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
           </button>
 
           {showAdvanced && (
-            <div className="space-y-3 pt-3 animate-in">
+            <div className="space-y-4 pt-3 animate-in">
+              
+              {/* Intensidade da Dor */}
+              <div className="space-y-1.5 p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)]">
+                <div className="flex items-center justify-between">
+                  <label className="form-label mb-0">
+                    Intensidade da Dor (1 a 10)
+                  </label>
+                  {intensity !== null ? (
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
+                      {intensity}/10 • {currentColor?.label}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-[var(--text-muted)]">Não informada</span>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-10 gap-1 sm:gap-1.5">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => {
+                    const isSelected = intensity === num;
+                    return (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => handleIntensityClick(num)}
+                        className={`h-8 sm:h-9 rounded-md text-xs font-semibold transition-all ${
+                          isSelected
+                            ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-sm scale-105'
+                            : 'bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               <TagPicker
                 label="Sintomas"
                 options={COMMON_SYMPTOMS}
