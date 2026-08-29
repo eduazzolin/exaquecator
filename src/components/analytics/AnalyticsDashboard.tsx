@@ -11,7 +11,7 @@ import {
   Area
 } from 'recharts';
 import { formatDayMonth } from '../../utils/dateUtils';
-import { Activity, Sparkles, TrendingUp, AlertTriangle, Pill } from 'lucide-react';
+import { Activity, Sparkles, TrendingUp, AlertTriangle, Pill, CloudRain, Moon } from 'lucide-react';
 
 interface AnalyticsDashboardProps {
   crises: CrisisRecord[];
@@ -42,6 +42,55 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ crises, 
   const avgIntensity = crisesWithIntensity.length > 0
     ? (crisesWithIntensity.reduce((acc, c) => acc + (c.intensity || 0), 0) / crisesWithIntensity.length).toFixed(1)
     : '-';
+
+  // Environmental & Barometric calculations
+  const crisesWithWeather = crises.filter(c => c.weather);
+  const fallingPressureCrises = crisesWithWeather.filter(c => 
+    c.weather?.pressureStatus === 'falling' || (c.weather?.pressureVariation24h !== undefined && c.weather.pressureVariation24h <= -2.5)
+  );
+  const fallingPressurePct = crisesWithWeather.length > 0
+    ? Math.round((fallingPressureCrises.length / crisesWithWeather.length) * 100)
+    : null;
+
+  const avgTemp = crisesWithWeather.length > 0
+    ? (crisesWithWeather.reduce((acc, c) => acc + (c.weather?.temperature || 0), 0) / crisesWithWeather.length).toFixed(0)
+    : null;
+
+  // Weather conditions breakdown
+  const weatherMap: Record<string, { count: number; icon: string }> = {};
+  crisesWithWeather.forEach(c => {
+    const desc = c.weather?.weatherDescription || 'Outro';
+    const icon = c.weather?.weatherIcon || '⛅';
+    if (!weatherMap[desc]) weatherMap[desc] = { count: 0, icon };
+    weatherMap[desc].count += 1;
+  });
+  const weatherData = Object.entries(weatherMap)
+    .map(([name, data]) => ({ name: `${data.icon} ${name}`, count: data.count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 4);
+
+  // Circadian distribution (Time of Day)
+  const timeOfDayMap: Record<string, number> = {
+    'Manhã (06-12h)': 0,
+    'Tarde (12-18h)': 0,
+    'Noite (18-00h)': 0,
+    'Madrugada (00-06h)': 0
+  };
+  crises.forEach(c => {
+    const tod = c.timeOfDay || (c.startTime ? (
+      parseInt(c.startTime.split(':')[0], 10) < 6 ? 'madrugada' :
+      parseInt(c.startTime.split(':')[0], 10) < 12 ? 'manha' :
+      parseInt(c.startTime.split(':')[0], 10) < 18 ? 'tarde' : 'noite'
+    ) : null);
+
+    if (tod === 'manha') timeOfDayMap['Manhã (06-12h)'] += 1;
+    else if (tod === 'tarde') timeOfDayMap['Tarde (12-18h)'] += 1;
+    else if (tod === 'noite') timeOfDayMap['Noite (18-00h)'] += 1;
+    else if (tod === 'madrugada') timeOfDayMap['Madrugada (00-06h)'] += 1;
+  });
+  const circadianData = Object.entries(timeOfDayMap)
+    .map(([period, count]) => ({ period, count }))
+    .filter(item => item.count > 0);
 
   // Triggers count
   const triggersMap: Record<string, number> = {};
@@ -241,6 +290,91 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ crises, 
           </div>
         </div>
       )}
+
+      {/* Environmental & Circadian Pattern Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+        
+        {/* Padrão Circadiano (Horário das Crises) */}
+        <div className="glass p-4 sm:p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] flex items-center gap-1.5">
+              <Moon className="w-4 h-4 text-indigo-400" />
+              Padrão Circadiano (Período)
+            </h3>
+            <span className="text-[10px] text-[var(--text-muted)]">Horário de início</span>
+          </div>
+
+          <div className="h-44 w-full">
+            {circadianData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={circadianData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
+                  <XAxis dataKey="period" stroke={textColor} fontSize={10} tickLine={false} />
+                  <YAxis stroke={textColor} fontSize={10} allowDecimals={false} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: tooltipBg, borderColor: tooltipBorder, borderRadius: '6px', fontSize: '11px', color: tooltipText }}
+                  />
+                  <Bar dataKey="count" fill="#818cf8" radius={[3, 3, 0, 0]} name="Crises" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-xs text-[var(--text-muted)] text-center pt-16">Sem horários informados</p>
+            )}
+          </div>
+        </div>
+
+        {/* Gatilhos Ambientais & Clima Automático */}
+        <div className="glass p-4 sm:p-5 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="font-semibold text-xs sm:text-sm text-[var(--text-primary)] flex items-center gap-1.5">
+              <CloudRain className="w-4 h-4 text-sky-400" />
+              Gatilhos Ambientais & Clima
+            </h3>
+            <span className="text-[10px] text-[var(--text-muted)]">Coleta automática</span>
+          </div>
+
+          {crisesWithWeather.length > 0 ? (
+            <div className="space-y-2.5 pt-1">
+              {/* Quick Environmental Highlights */}
+              <div className="grid grid-cols-2 gap-2">
+                <div className="p-2.5 rounded bg-[var(--bg-secondary)] border border-[var(--card-border)]">
+                  <p className="text-[10px] text-[var(--text-muted)] font-semibold uppercase">Queda de Pressão</p>
+                  <p className="text-base font-bold text-rose-500 mt-0.5">
+                    {fallingPressurePct !== null ? `${fallingPressurePct}%` : '—'}
+                  </p>
+                  <p className="text-[10px] text-[var(--text-muted)]">das crises registradas</p>
+                </div>
+
+                <div className="p-2.5 rounded bg-[var(--bg-secondary)] border border-[var(--card-border)]">
+                  <p className="text-[10px] text-[var(--text-muted)] font-semibold uppercase">Temp. Média</p>
+                  <p className="text-base font-bold text-[var(--text-primary)] mt-0.5">
+                    {avgTemp !== null ? `${avgTemp}°C` : '—'}
+                  </p>
+                  <p className="text-[10px] text-[var(--text-muted)]">no dia do episódio</p>
+                </div>
+              </div>
+
+              {/* Weather Conditions List */}
+              {weatherData.length > 0 && (
+                <div className="space-y-1.5 pt-1">
+                  <p className="text-[11px] font-medium text-[var(--text-secondary)]">Condições climáticas mais frequentes:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {weatherData.map((item, i) => (
+                      <span key={i} className="text-xs px-2.5 py-1 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)]">
+                        {item.name} <strong className="text-[var(--text-muted)] font-normal">({item.count}x)</strong>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <p className="text-xs text-[var(--text-muted)] text-center pt-16">
+              Os dados climáticos serão consolidados conforme novos registros forem salvos.
+            </p>
+          )}
+        </div>
+
+      </div>
 
     </div>
   );
