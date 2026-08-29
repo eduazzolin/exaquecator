@@ -9,5 +9,5 @@
 - **Visualização do Calendário**: Preencher o fundo das células com a cor da categoria (Azul = Presença, Laranja/Vermelho = Dor, Roxo = Aura) e marcar dias com medicação usando o indicador `💊`.
 
 ## 2. Favicons e Requisitos PWA
-- **Favicons**: Manter o favicon em SVG limpo, transparente e centralizado de ponta a ponta sem bordas escuras desproporcionais.
-- **Suíte PWA**: Manter sempre os arquivos PNG de 192x192, 512x512 (com suporte a `maskable`), `apple-touch-icon.png` e `favicon-32x32.png` na pasta `public/` e sincronizados com `vite.config.ts`.
+- **Favicons**: Manter o favicon em SVG vetorial limpo, transparente e centralizado de ponta a ponta sem bordas escuras desproporcionais, acompanhado de `favicon.ico` com múltiplas resoluções para barra de favoritos.
+- **Suíte PWA**: Manter sempre os arquivos `favicon.ico`, PNGs de 192x192, 512x512 (com suporte a `maskable`), `apple-touch-icon.png` e `favicon-32x32.png` na pasta `public/` e sincronizados com `vite.config.ts`.
