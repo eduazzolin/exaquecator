@@ -88,23 +88,24 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     }
   };
 
+  const painFreePercentage = totalDaysInMonth > 0 ? Math.round((painFreeDays / totalDaysInMonth) * 100) : 100;
+  const monthCrisesWithIntensity = currentMonthCrises.filter(c => c.intensity !== null && c.intensity !== undefined);
+  const monthAvgIntensity = monthCrisesWithIntensity.length > 0
+    ? (monthCrisesWithIntensity.reduce((acc, c) => acc + (c.intensity || 0), 0) / monthCrisesWithIntensity.length).toFixed(1)
+    : '—';
+
   return (
     <div className="space-y-4">
       {/* Calendar Card */}
       <div className="glass p-4 sm:p-6 space-y-4">
         
-        {/* Month Header */}
-        <div className="flex items-center justify-between">
+        {/* Month Header & Quick Navigation */}
+        <div className="flex items-center justify-between pb-3 border-b border-[var(--card-border)]">
           <div className="flex items-center gap-2.5">
             <CalendarIcon className="w-4 h-4 text-[var(--text-secondary)]" />
-            <div>
-              <h3 className="text-sm sm:text-base font-semibold text-[var(--text-primary)] capitalize">
-                {format(currentMonth, "MMMM 'de' yyyy", { locale: ptBR })}
-              </h3>
-              <p className="text-[11px] text-[var(--text-muted)]">
-                {daysWithCrisis} {daysWithCrisis === 1 ? 'dia com registro' : 'dias com registros'} • {painFreeDays} dias livres
-              </p>
-            </div>
+            <h3 className="text-sm sm:text-base font-semibold text-[var(--text-primary)] capitalize">
+              {format(currentMonth, "MMMM 'de' yyyy", { locale: ptBR })}
+            </h3>
           </div>
 
           <div className="flex items-center gap-1.5">
@@ -134,6 +135,30 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <ChevronRight className="w-4 h-4" />
               </button>
             </div>
+          </div>
+        </div>
+
+        {/* Monthly Micro-KPIs */}
+        <div className="grid grid-cols-3 gap-2">
+          <div className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center">
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Dias Livres</p>
+            <p className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {painFreeDays}d <span className="text-[10px] font-normal text-[var(--text-muted)]">({painFreePercentage}%)</span>
+            </p>
+          </div>
+
+          <div className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center">
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Com Registro</p>
+            <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-0.5">
+              {daysWithCrisis} dia{daysWithCrisis === 1 ? '' : 's'}
+            </p>
+          </div>
+
+          <div className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center">
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Média de Dor</p>
+            <p className="text-sm sm:text-base font-bold text-[var(--color-below)] mt-0.5">
+              {monthAvgIntensity !== '—' ? `${monthAvgIntensity}/10` : '—'}
+            </p>
           </div>
         </div>
 

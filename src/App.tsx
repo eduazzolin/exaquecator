@@ -3,7 +3,9 @@ import { useData } from './context/DataContext';
 import { Navbar } from './components/layout/Navbar';
 import { BottomNav } from './components/layout/BottomNav';
 import { ToastContainer } from './components/common/ToastContainer';
-import { CrisisForm } from './components/crisis/CrisisForm';
+import { DailyCheckInHero } from './components/crisis/DailyCheckInHero';
+import { RecentEpisodesFeed } from './components/crisis/RecentEpisodesFeed';
+import { CrisisModal } from './components/crisis/CrisisModal';
 import { CalendarView } from './components/calendar/CalendarView';
 import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 import { MedicationManager } from './components/medications/MedicationManager';
@@ -16,6 +18,7 @@ export const App: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'timeline' | 'analytics' | 'medications'>('timeline');
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
+  const [isCrisisModalOpen, setIsCrisisModalOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
@@ -48,9 +51,9 @@ export const App: React.FC = () => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
-  const handleEditInForm = (date: string) => {
-    setSelectedDate(date);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleOpenLogModal = (date?: string) => {
+    if (date) setSelectedDate(date);
+    setIsCrisisModalOpen(true);
   };
 
   return (
@@ -72,22 +75,30 @@ export const App: React.FC = () => {
       {/* Main Container */}
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-6 flex-1 w-full space-y-6">
         
-        {/* VIEW 1: DIÁRIO (FORMULÁRIO NO TOPO + CALENDÁRIO COM DETALHES ABAIXO) */}
+        {/* VIEW 1: DIÁRIO (STATUS HERO + CALENDÁRIO COM KPIS + HISTÓRICO RECENTE) */}
         {activeTab === 'timeline' && (
           <div className="space-y-6 animate-in">
             
-            {/* 1. Formulário Minimalista */}
-            <CrisisForm
+            {/* 1. Hero Check-in do Dia */}
+            <DailyCheckInHero
               selectedDate={selectedDate}
-              onDateChange={setSelectedDate}
+              onSelectDate={setSelectedDate}
+              onOpenLogModal={handleOpenLogModal}
             />
 
-            {/* 2. Calendário Interativo Minimalista */}
+            {/* 2. Calendário Interativo Minimalista com Micro-KPIs */}
             <CalendarView
               crises={crises}
               selectedDate={selectedDate}
               onSelectDate={setSelectedDate}
-              onEditInForm={handleEditInForm}
+              onEditInForm={handleOpenLogModal}
+            />
+
+            {/* 3. Feed dos Últimos Episódios */}
+            <RecentEpisodesFeed
+              crises={crises}
+              onSelectDate={setSelectedDate}
+              onEditEpisode={handleOpenLogModal}
             />
 
           </div>
@@ -119,6 +130,13 @@ export const App: React.FC = () => {
       />
 
       {/* Modals */}
+      <CrisisModal
+        isOpen={isCrisisModalOpen}
+        onClose={() => setIsCrisisModalOpen(false)}
+        selectedDate={selectedDate}
+        onDateChange={setSelectedDate}
+      />
+
       <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
