@@ -2,15 +2,14 @@ import React from 'react';
 import { useData } from '../../context/DataContext';
 import { Medication } from '../../types';
 import { formatDateFull, getTodayDateString } from '../../utils/dateUtils';
-import { getIntensityColor } from '../../utils/constants';
+import { getIntensityColor, formatPeriod } from '../../utils/constants';
 import { 
   CheckCircle2, 
   Sparkles, 
   Plus, 
   Edit3, 
   Pill, 
-  Trash2,
-  Clock
+  Trash2
 } from 'lucide-react';
 
 interface DailyCheckInHeroProps {
@@ -154,8 +153,7 @@ export const DailyCheckInHero: React.FC<DailyCheckInHeroProps> = ({
 
               {selectedRecord.startTime && (
                 <span className="badge bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] font-medium">
-                  <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
-                  {selectedRecord.startTime}
+                  {formatPeriod(selectedRecord.startTime)}
                 </span>
               )}
             </div>

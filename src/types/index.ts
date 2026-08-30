@@ -23,11 +23,13 @@ export interface MedicationTaken {
 
 export type CrisisType = 'presenca' | 'dor' | 'aura';
 
+export type TimePeriod = 'manha' | 'tarde' | 'noite';
+
 export interface CrisisRecord {
   id: string;
   userId?: string;
   date: string; // Formato YYYY-MM-DD
-  startTime?: string; // Formato HH:mm (opcional)
+  startTime?: TimePeriod | string; // 'manha' | 'tarde' | 'noite' (ou legado HH:mm)
   type?: CrisisType | null; // 'presenca' | 'dor' | 'aura'
   intensity: number | null; // 1 a 10 ou null se não informada
   symptoms?: string[];

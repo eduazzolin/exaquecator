@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { MedicationTaken, ReliefLevel, CrisisType } from '../../types';
-import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor } from '../../utils/constants';
+import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor, PERIOD_OPTIONS } from '../../utils/constants';
 import { formatDateFull } from '../../utils/dateUtils';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
@@ -194,25 +194,27 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           <div>
             <label className="form-label flex items-center gap-1">
               <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
-              Hora de Início
+              Período
             </label>
-            <div className="flex items-center gap-1.5">
-              <input
-                type="time"
-                value={startTime}
-                onChange={e => setStartTime(e.target.value)}
-                className="px-2.5 py-1.5 h-[34px] rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--card-border-hover)] transition-colors"
-              />
-              {startTime && (
-                <button
-                  type="button"
-                  onClick={() => setStartTime('')}
-                  className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
-                  title="Limpar horário"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
+            <div className="flex items-center gap-1">
+              {PERIOD_OPTIONS.map(opt => {
+                const isSelected = startTime === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => setStartTime(isSelected ? '' : opt.id)}
+                    className={`px-2.5 py-1.5 h-[34px] rounded-md text-xs font-medium border transition-all flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm'
+                        : 'bg-[var(--card-bg)] text-[var(--text-secondary)] border-[var(--card-border)] hover:border-[var(--card-border-hover)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    <span>{opt.icon}</span>
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

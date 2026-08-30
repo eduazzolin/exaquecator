@@ -2,7 +2,8 @@ import React from 'react';
 import { CrisisRecord } from '../../types';
 import { formatDateFull } from '../../utils/dateUtils';
 import { IntensityBadge } from '../common/IntensityBadge';
-import { Calendar, Pill, Clock, Edit3 } from 'lucide-react';
+import { formatPeriod } from '../../utils/constants';
+import { Calendar, Pill, Edit3 } from 'lucide-react';
 
 interface RecentEpisodesFeedProps {
   crises: CrisisRecord[];
@@ -49,8 +50,7 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
                   </span>
                   {crisis.startTime && (
                     <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-0.5">
-                      <Clock className="w-3 h-3" />
-                      {crisis.startTime}
+                      {formatPeriod(crisis.startTime)}
                     </span>
                   )}
                 </div>

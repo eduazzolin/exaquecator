@@ -108,3 +108,23 @@ export const getIntensityColor = (level: number) => {
   const rounded = Math.max(1, Math.min(10, Math.round(level)));
   return INTENSITY_COLORS[rounded] || INTENSITY_COLORS[5];
 };
+
+export const PERIOD_OPTIONS = [
+  { id: 'manha', label: 'Manhã', icon: '🌅' },
+  { id: 'tarde', label: 'Tarde', icon: '☀️' },
+  { id: 'noite', label: 'Noite', icon: '🌙' },
+] as const;
+
+export const formatPeriod = (period?: string | null): string => {
+  if (!period) return '';
+  const match = PERIOD_OPTIONS.find(p => p.id === period.toLowerCase());
+  if (match) return `${match.icon} ${match.label}`;
+  return period;
+};
+
+export const getPeriodLabel = (period?: string | null): string => {
+  if (!period) return '';
+  const match = PERIOD_OPTIONS.find(p => p.id === period.toLowerCase());
+  if (match) return match.label;
+  return period;
+};

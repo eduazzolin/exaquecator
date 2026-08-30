@@ -1,11 +1,12 @@
 import { CrisisRecord } from '../types';
 import { formatDateShort } from '../utils/dateUtils';
+import { getPeriodLabel } from '../utils/constants';
 
 export const exportToCSV = (crises: CrisisRecord[]) => {
   const headers = [
     'ID',
     'Data',
-    'Hora de Início',
+    'Período',
     'Tipo',
     'Intensidade (1-10)',
     'Medicamentos',
@@ -23,7 +24,7 @@ export const exportToCSV = (crises: CrisisRecord[]) => {
     return [
       c.id,
       `"${formatDateShort(c.date)}"`,
-      `"${c.startTime || ''}"`,
+      `"${getPeriodLabel(c.startTime)}"`,
       `"${c.type || 'N/I'}"`,
       c.intensity !== null && c.intensity !== undefined ? c.intensity : '""',
       `"${meds}"`,

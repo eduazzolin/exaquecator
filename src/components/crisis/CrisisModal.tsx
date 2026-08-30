@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { MedicationTaken, ReliefLevel, CrisisType } from '../../types';
-import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor } from '../../utils/constants';
+import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor, PERIOD_OPTIONS } from '../../utils/constants';
 import { formatDateFull } from '../../utils/dateUtils';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
@@ -199,33 +199,36 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({
         {/* Form Body - Scrollable */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-6 overflow-y-auto space-y-5 flex-1">
           
-          {/* Time & Type Row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {/* Period & Type Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="form-label flex items-center gap-1">
                 <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
-                Hora de Início
+                Período
               </label>
-              <div className="flex items-center gap-1.5">
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={e => setStartTime(e.target.value)}
-                  className="input-field text-xs h-[36px]"
-                />
-                {startTime && (
-                  <button
-                    type="button"
-                    onClick={() => setStartTime('')}
-                    className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
+              <div className="grid grid-cols-3 gap-1.5">
+                {PERIOD_OPTIONS.map(opt => {
+                  const isSelected = startTime === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => setStartTime(isSelected ? '' : opt.id)}
+                      className={`p-2 rounded-md text-xs font-medium border transition-all flex items-center justify-center gap-1.5 ${
+                        isSelected
+                          ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm'
+                          : 'bg-[var(--bg-secondary)] text-[var(--text-secondary)] border-[var(--card-border)] hover:border-[var(--card-border-hover)] hover:text-[var(--text-primary)]'
+                      }`}
+                    >
+                      <span>{opt.icon}</span>
+                      <span>{opt.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
-            <div className="sm:col-span-2">
+            <div>
               <label className="form-label">
                 Tipo do Episódio
               </label>

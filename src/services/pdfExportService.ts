@@ -2,6 +2,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { CrisisRecord } from '../types';
 import { formatDateShort } from '../utils/dateUtils';
+import { getPeriodLabel } from '../utils/constants';
 
 interface GeneratePDFOptions {
   patientName?: string;
@@ -103,7 +104,8 @@ export const generateMedicalReportPDF = ({
 
   const tableData = crises.map(c => {
     const dateText = formatDateShort(c.date);
-    const formattedDate = c.startTime ? `${dateText}\nàs ${c.startTime}` : dateText;
+    const period = getPeriodLabel(c.startTime);
+    const formattedDate = period ? `${dateText}\n(${period})` : dateText;
     const typeLabel = c.type ? typeMap[c.type] || c.type : '-';
     
     const meds = (c.medicationsTaken || []).map(m => {

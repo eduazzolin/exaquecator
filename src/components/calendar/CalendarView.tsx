@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { CrisisRecord } from '../../types';
 import { IntensityBadge } from '../common/IntensityBadge';
 import { formatDateFull } from '../../utils/dateUtils';
+import { formatPeriod } from '../../utils/constants';
 import { 
   ChevronLeft, 
   ChevronRight, 
@@ -355,7 +356,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               {selectedCrisis.startTime && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)]">
                   <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
-                  Início às {selectedCrisis.startTime}
+                  {formatPeriod(selectedCrisis.startTime)}
                 </span>
               )}
 
