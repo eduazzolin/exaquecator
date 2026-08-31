@@ -38,8 +38,8 @@ export const Navbar: React.FC<NavbarProps> = ({
           onClick={() => setActiveTab('timeline')}
           className="flex items-center gap-2.5 cursor-pointer select-none group"
         >
-          <div className="w-8 h-8 rounded-lg bg-[var(--bg-secondary)] border border-[var(--card-border)] flex items-center justify-center shadow-sm transition-transform group-hover:scale-105 overflow-hidden">
-            <img src="/favicon.svg" alt="Enxaquecator Logo" className="w-5 h-5 object-contain select-none pointer-events-none" />
+          <div className="w-8 h-8 rounded-lg border border-[var(--card-border)] flex items-center justify-center shadow-sm transition-transform group-hover:scale-105 overflow-hidden">
+            <img src="/favicon.svg" alt="Enxaquecator Logo" className="w-full h-full object-cover select-none pointer-events-none" />
           </div>
           <span className="font-semibold text-sm sm:text-base text-[var(--text-primary)] tracking-tight">
             Enxaquecator
