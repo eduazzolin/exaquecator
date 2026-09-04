@@ -14,3 +14,6 @@
 
 ## 3. Controle e Acompanhamento de Versão
 - **Versionamento Contínuo a Cada Push**: A cada novo push/deploy, aumente a versão (ex: 1.0.0 -> 1.0.1 -> 1.0.2) mantendo-a sincronizada em `package.json`, em `src/utils/constants.ts` (`APP_VERSION`) e exibida na interface (Navbar e rodapé).
+
+## 4. Publicação e CI/CD
+- **Deploy Automático via GitHub Actions**: O repositório possui CI/CD configurado em `.github/workflows/firebase-hosting-merge.yml`, que roda o build e o deploy automaticamente no Firebase Hosting a cada push na `main`. **Não execute** `npm run deploy` ou comandos manuais do Firebase Hosting; apenas valide localmente com `npm run build` e faça o `git push origin main`.
