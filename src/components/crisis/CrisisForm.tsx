@@ -284,7 +284,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                 id: 'aura' as CrisisType,
                 label: 'Aura',
                 emoji: '✨',
-                desc: 'Visual ou sensorial',
+                desc: 'O capeta',
                 selectedClasses: 'border-violet-500/50 bg-violet-500/10 text-violet-700 dark:text-violet-300 ring-1 ring-violet-500/30',
                 badgeClasses: 'bg-violet-500 text-white dark:text-slate-900',
                 descClasses: 'text-violet-600/80 dark:text-violet-300/80'
