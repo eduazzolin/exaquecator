@@ -234,7 +234,7 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({
               </label>
               <div className="grid grid-cols-3 gap-1.5">
                 {[
-                  { id: 'presenca' as CrisisType, label: 'Presença', emoji: '🌫️' },
+                  { id: 'presenca' as CrisisType, label: 'Presença', emoji: '🌀' },
                   { id: 'dor' as CrisisType, label: 'Dor', emoji: '💥' },
                   { id: 'aura' as CrisisType, label: 'Aura', emoji: '✨' }
                 ].map(opt => {

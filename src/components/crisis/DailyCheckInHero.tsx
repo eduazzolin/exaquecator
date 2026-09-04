@@ -134,7 +134,7 @@ export const DailyCheckInHero: React.FC<DailyCheckInHeroProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               {selectedRecord.type && (
                 <span className="badge bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)] font-semibold">
-                  {selectedRecord.type === 'presenca' && '🌫️ Presença'}
+                  {selectedRecord.type === 'presenca' && '🌀 Presença'}
                   {selectedRecord.type === 'dor' && '💥 Crise de Dor'}
                   {selectedRecord.type === 'aura' && '✨ Aura Visual/Sensorial'}
                 </span>

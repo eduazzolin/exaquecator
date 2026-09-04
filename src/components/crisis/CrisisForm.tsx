@@ -265,7 +265,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
               {
                 id: 'presenca' as CrisisType,
                 label: 'Presença',
-                emoji: '🌫️',
+                emoji: '🌀',
                 desc: 'Sensação ou pródromo',
                 selectedClasses: 'border-sky-500/50 bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30',
                 badgeClasses: 'bg-sky-500 text-white dark:text-slate-900',

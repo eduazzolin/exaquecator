@@ -94,7 +94,7 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
                   <div className="flex flex-wrap items-center gap-1.5">
                     {crisis.type && (
                       <span className="text-[11px] px-2 py-0.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] font-medium">
-                        {crisis.type === 'presenca' && '🌫️ Presença'}
+                        {crisis.type === 'presenca' && '🌀 Presença'}
                         {crisis.type === 'dor' && '💥 Dor'}
                         {crisis.type === 'aura' && '✨ Aura'}
                       </span>
