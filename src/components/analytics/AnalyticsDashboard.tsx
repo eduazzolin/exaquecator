@@ -10,8 +10,23 @@ import {
   AreaChart, 
   Area
 } from 'recharts';
-import { formatDayMonth } from '../../utils/dateUtils';
-import { Activity, Sparkles, TrendingUp, AlertTriangle, Pill } from 'lucide-react';
+import { 
+  formatDayMonth, 
+  calculateCrisisStreaks, 
+  formatStreakPeriod 
+} from '../../utils/dateUtils';
+import { 
+  Activity, 
+  Sparkles, 
+  TrendingUp, 
+  AlertTriangle, 
+  Pill, 
+  Trophy, 
+  Flame, 
+  ShieldCheck, 
+  Clock, 
+  Award
+} from 'lucide-react';
 
 interface AnalyticsDashboardProps {
   crises: CrisisRecord[];
@@ -87,6 +102,18 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ crises, 
     .sort((a, b) => b.totalCount - a.totalCount)
     .slice(0, 5);
 
+  // Streak & Records Stats
+  const streakStats = calculateCrisisStreaks(crises);
+  const { 
+    longestStreak, 
+    currentStreak, 
+    averageIntervalDays, 
+    totalMonitoredDays, 
+    totalFreeDays, 
+    freeDaysPercentage, 
+    topStreaks 
+  } = streakStats;
+
   // Timeline evolution data (chronological) with fallback for null
   const timelineData = [...crises]
     .sort((a, b) => a.date.localeCompare(b.date))
@@ -126,6 +153,176 @@ export const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ crises, 
             {symptomsData[0] ? `${symptomsData[0].name} (${symptomsData[0].count}x)` : '—'}
           </p>
         </div>
+      </div>
+
+      {/* Recordes de Dias Sem Crises */}
+      <div className="glass p-4 sm:p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 border-b border-[var(--card-border)] pb-3">
+          <div className="flex items-center gap-2">
+            <Trophy className="w-5 h-5 text-amber-500 shrink-0" />
+            <h3 className="font-semibold text-sm sm:text-base text-[var(--text-primary)]">
+              Recordes de Dias Sem Crises
+            </h3>
+          </div>
+          <span className="text-xs text-[var(--text-muted)]">
+            Intervalos consecutivos sem episódios
+          </span>
+        </div>
+
+        {/* 4 Cards de Destaque */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {/* Card 1: Maior Recorde */}
+          <div className="p-3.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--card-border)] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                  Maior Recorde
+                </span>
+                <Trophy className="w-4 h-4 text-amber-500 shrink-0" />
+              </div>
+              <p className="text-2xl font-bold text-amber-600 dark:text-amber-400 mt-2">
+                {longestStreak ? `${longestStreak.days} dia${longestStreak.days === 1 ? '' : 's'}` : '—'}
+              </p>
+            </div>
+            
+            <div className="mt-3 pt-2.5 border-t border-[var(--card-border)]/60">
+              <p className="text-[11px] font-medium text-[var(--text-secondary)] truncate" title={longestStreak ? formatStreakPeriod(longestStreak) : ''}>
+                {longestStreak ? formatStreakPeriod(longestStreak) : 'Sem intervalos'}
+              </p>
+              {longestStreak?.isCurrent && longestStreak.days > 0 && (
+                <span className="inline-block mt-1 text-[10px] font-semibold text-amber-600 dark:text-amber-300 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                  🔥 Em andamento!
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Card 2: Sequência Atual */}
+          <div className="p-3.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--card-border)] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                  Sequência Atual
+                </span>
+                <Flame className={`w-4 h-4 shrink-0 ${currentStreak && currentStreak.days > 0 ? 'text-emerald-500' : 'text-[var(--text-muted)]'}`} />
+              </div>
+              <p className={`text-2xl font-bold mt-2 ${
+                !currentStreak || currentStreak.days === 0
+                  ? 'text-[var(--text-muted)]'
+                  : 'text-emerald-600 dark:text-emerald-400'
+              }`}>
+                {currentStreak ? `${currentStreak.days} dia${currentStreak.days === 1 ? '' : 's'}` : '0 dias'}
+              </p>
+            </div>
+
+            <div className="mt-3 pt-2.5 border-t border-[var(--card-border)]/60">
+              <p className="text-[11px] font-medium text-[var(--text-secondary)] truncate" title={currentStreak ? formatStreakPeriod(currentStreak) : ''}>
+                {currentStreak ? formatStreakPeriod(currentStreak) : 'Hoje'}
+              </p>
+              {currentStreak && longestStreak && currentStreak.days > 0 && currentStreak.days >= longestStreak.days ? (
+                <span className="inline-block mt-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-300 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                  🎉 Novo recorde pessoal!
+                </span>
+              ) : currentStreak && longestStreak && longestStreak.days > 0 && currentStreak.days > 0 ? (
+                <span className="inline-block mt-1 text-[10px] text-[var(--text-muted)]">
+                  {Math.round((currentStreak.days / longestStreak.days) * 100)}% do seu recorde
+                </span>
+              ) : null}
+            </div>
+          </div>
+
+          {/* Card 3: Intervalo Médio */}
+          <div className="p-3.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--card-border)] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                  Intervalo Médio
+                </span>
+                <Clock className="w-4 h-4 text-[var(--text-secondary)] shrink-0" />
+              </div>
+              <p className="text-2xl font-bold text-[var(--text-primary)] mt-2">
+                {averageIntervalDays !== null ? `~${averageIntervalDays}d` : '—'}
+              </p>
+            </div>
+
+            <div className="mt-3 pt-2.5 border-t border-[var(--card-border)]/60">
+              <p className="text-[11px] text-[var(--text-muted)]">
+                Espaço médio entre crises
+              </p>
+            </div>
+          </div>
+
+          {/* Card 4: Taxa de Dias Livres */}
+          <div className="p-3.5 rounded-lg bg-[var(--bg-secondary)] border border-[var(--card-border)] flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-[var(--text-muted)] uppercase tracking-wider">
+                  Tempo sem Dor
+                </span>
+                <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
+              </div>
+              <p className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 mt-2">
+                {freeDaysPercentage}%
+              </p>
+            </div>
+
+            <div className="mt-3 pt-2.5 border-t border-[var(--card-border)]/60">
+              <p className="text-[11px] text-[var(--text-muted)]">
+                {totalFreeDays} de {totalMonitoredDays} dias monitorados
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Ranking dos Maiores Períodos Sem Crises */}
+        {topStreaks.length > 0 ? (
+          <div className="pt-2">
+            <h4 className="text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+              <Award className="w-3.5 h-3.5 text-amber-500" />
+              Ranking dos Maiores Períodos Livres
+            </h4>
+            <div className="space-y-1.5">
+              {topStreaks.map((streak, idx) => {
+                const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
+                return (
+                  <div
+                    key={`${streak.startDate}-${streak.endDate}-${idx}`}
+                    className="flex items-center justify-between p-2.5 rounded-md bg-[var(--bg-secondary)] hover:bg-[var(--card-border)]/40 transition-colors text-xs"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="text-sm font-semibold shrink-0 w-6 text-center">{medal}</span>
+                      <div className="min-w-0">
+                        <p className="font-medium text-[var(--text-primary)] truncate">
+                          {formatStreakPeriod(streak)}
+                        </p>
+                        <p className="text-[10px] text-[var(--text-muted)]">
+                          {streak.isCurrent ? 'Sequência em andamento' : 'Intervalo histórico'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 shrink-0">
+                      {streak.isCurrent && (
+                        <span className="text-[10px] font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                          Atual 🔥
+                        </span>
+                      )}
+                      <span className="font-bold text-[var(--text-primary)] bg-[var(--card-bg)] border border-[var(--card-border)] px-2 py-0.5 rounded">
+                        {streak.days} dia{streak.days === 1 ? '' : 's'}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center">
+            <p className="text-xs text-[var(--text-muted)]">
+              Continue registrando suas crises para desbloquear o ranking de maiores intervalos sem dor.
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Pain Evolution Chart */}
