@@ -11,6 +11,7 @@ import { MedicationManager } from './components/medications/MedicationManager';
 import { ExportModal } from './components/export/ExportModal';
 import { AuthModal } from './components/auth/AuthModal';
 import { getTodayDateString } from './utils/dateUtils';
+import { APP_VERSION } from './utils/constants';
 
 export const App: React.FC = () => {
   const { crises } = useData();
@@ -121,6 +122,13 @@ export const App: React.FC = () => {
         )}
 
       </main>
+
+      {/* Footer Version Info */}
+      <footer className="py-6 text-center text-xs text-[var(--text-muted)] pb-24 sm:pb-8">
+        <p className="font-mono text-[11px] opacity-75">
+          Enxaquecator v{APP_VERSION}
+        </p>
+      </footer>
 
       {/* Mobile Bottom Navigation */}
       <BottomNav

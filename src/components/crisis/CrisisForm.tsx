@@ -46,7 +46,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
       setTriggers(existingCrisis.triggers || []);
       setMedicationsTaken(existingCrisis.medicationsTaken || []);
       setNotes(existingCrisis.notes || '');
-      if (existingCrisis.notes || (existingCrisis.triggers && existingCrisis.triggers.length > 0) || (existingCrisis.symptoms && existingCrisis.symptoms.length > 0) || existingCrisis.intensity !== null) {
+      if ((existingCrisis.triggers && existingCrisis.triggers.length > 0) || (existingCrisis.symptoms && existingCrisis.symptoms.length > 0) || existingCrisis.intensity !== null) {
         setShowAdvanced(true);
       }
     } else {
@@ -465,7 +465,21 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           )}
         </div>
 
-        {/* 4. SEÇÃO RETRÁTIL: INTENSIDADE, SINTOMAS, GATILHOS E NOTAS */}
+        {/* 4. DESCRIÇÃO / OBSERVAÇÕES (Visível na frente do formulário) */}
+        <div className="space-y-1.5">
+          <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
+            Descrição / Observações
+          </label>
+          <textarea
+            rows={2}
+            value={notes}
+            onChange={e => setNotes(e.target.value)}
+            placeholder="Notas adicionais, contexto ou observações sobre o episódio..."
+            className="input-field text-xs resize-none rounded-xl"
+          />
+        </div>
+
+        {/* 5. SEÇÃO RETRÁTIL: INTENSIDADE, SINTOMAS E GATILHOS */}
         <div className="border border-[var(--card-border)] rounded-xl bg-[var(--bg-secondary)]/40 overflow-hidden transition-all">
           <button
             type="button"
@@ -475,7 +489,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             <div className="flex items-center gap-2 flex-wrap">
               <Sparkles className="w-4 h-4 text-[var(--text-secondary)]" />
               <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Intensidade, Sintomas, Gatilhos e Notas
+                Intensidade, Sintomas e Gatilhos
               </span>
               <span className="text-[10px] text-[var(--text-muted)] font-normal hidden sm:inline">
                 • Opcional
@@ -556,19 +570,6 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                 onChange={setTriggers}
                 placeholderCustom="Outro gatilho..."
               />
-
-              <div>
-                <label className="form-label">
-                  Observações
-                </label>
-                <textarea
-                  rows={2}
-                  value={notes}
-                  onChange={e => setNotes(e.target.value)}
-                  placeholder="Notas adicionais sobre o episódio..."
-                  className="input-field text-xs resize-none"
-                />
-              </div>
             </div>
           )}
         </div>
@@ -576,13 +577,11 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         {/* 5. BARRA DE SALVAR */}
         <div className="pt-3 border-t border-[var(--card-border)] flex items-center justify-between flex-wrap gap-3">
           <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
-            {existingCrisis ? (
+            {existingCrisis && (
               <span className="text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1.5">
                 <Pencil className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
                 <span>Alterando registro do dia <strong>{formatDateFull(selectedDate)}</strong></span>
               </span>
-            ) : (
-              <span>Preenchimento ágil • Diário direto na tela inicial</span>
             )}
           </div>
 

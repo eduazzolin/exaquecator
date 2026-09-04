@@ -1,5 +1,6 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { APP_VERSION } from '../../utils/constants';
 import { 
   BarChart2, 
   Pill, 
@@ -41,9 +42,14 @@ export const Navbar: React.FC<NavbarProps> = ({
           <div className="w-8 h-8 rounded-lg border border-[var(--card-border)] flex items-center justify-center shadow-sm transition-transform group-hover:scale-105 overflow-hidden">
             <img src="/favicon.svg" alt="Enxaquecator Logo" className="w-full h-full object-cover select-none pointer-events-none" />
           </div>
-          <span className="font-semibold text-sm sm:text-base text-[var(--text-primary)] tracking-tight">
-            Enxaquecator
-          </span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-semibold text-sm sm:text-base text-[var(--text-primary)] tracking-tight">
+              Enxaquecator
+            </span>
+            <span className="text-[9px] font-mono text-[var(--text-muted)]">
+              v{APP_VERSION}
+            </span>
+          </div>
         </div>
 
         {/* Desktop Segmented Navigation */}
