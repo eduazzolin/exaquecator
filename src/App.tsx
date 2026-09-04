@@ -55,15 +55,6 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleSelectDateInCalendar = (date: string) => {
-    setSelectedCalendarDay(date);
-    setSelectedDate(date);
-    const calendarEl = document.getElementById('calendar-card');
-    if (calendarEl) {
-      calendarEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
   return (
     <div className="min-h-screen flex flex-col pb-24 sm:pb-12 transition-colors duration-200">
       
@@ -106,7 +97,7 @@ export const App: React.FC = () => {
             {/* 3. Feed dos Últimos Episódios */}
             <RecentEpisodesFeed
               crises={crises}
-              onSelectDate={handleSelectDateInCalendar}
+              onEditEpisode={handleSelectDateForEdit}
             />
 
           </div>
