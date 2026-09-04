@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { CrisisRecord } from '../../types';
 import { IntensityBadge } from '../common/IntensityBadge';
-import { formatDateFull } from '../../utils/dateUtils';
+import { formatDateFull, getDaysSinceLastCrisis } from '../../utils/dateUtils';
 import { formatPeriod } from '../../utils/constants';
 import { 
   ChevronLeft, 
@@ -94,10 +94,13 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     ? (monthCrisesWithIntensity.reduce((acc, c) => acc + (c.intensity || 0), 0) / monthCrisesWithIntensity.length).toFixed(1)
     : '—';
 
+  // KPI: Dias desde a última crise registrada
+  const { days: daysSinceLastCrisis, latestDate: lastCrisisDate } = getDaysSinceLastCrisis(crises);
+
   return (
-    <div className="space-y-4">
-      {/* Calendar Card */}
-      <div className="glass p-4 sm:p-6 space-y-4">
+    <div className="glass p-4 sm:p-6 space-y-6 animate-in">
+      {/* Calendar Section */}
+      <div className="space-y-4">
         
         {/* Month Header & Quick Navigation */}
         <div className="flex items-center justify-between pb-3 border-b border-[var(--card-border)]">
@@ -138,27 +141,65 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           </div>
         </div>
 
-        {/* Monthly Micro-KPIs */}
-        <div className="grid grid-cols-3 gap-2">
-          <div className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center">
-            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Dias Livres</p>
-            <p className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-              {painFreeDays}d <span className="text-[10px] font-normal text-[var(--text-muted)]">({painFreePercentage}%)</span>
+        {/* Micro-KPIs Grid (including Dias desde a última crise) */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {/* KPI 1: Dias desde a última crise */}
+          <div 
+            className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center flex flex-col justify-between"
+            title="Dias decorridos desde a última crise registrada"
+          >
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider truncate">
+              Última Crise
             </p>
+            <p className={`text-sm sm:text-base font-bold mt-0.5 ${
+              daysSinceLastCrisis === null
+                ? 'text-[var(--text-muted)]'
+                : daysSinceLastCrisis === 0
+                ? 'text-amber-500'
+                : 'text-emerald-600 dark:text-emerald-400'
+            }`}>
+              {daysSinceLastCrisis !== null 
+                ? (daysSinceLastCrisis === 0 ? '0 dias' : `${daysSinceLastCrisis} dia${daysSinceLastCrisis === 1 ? '' : 's'}`)
+                : '—'}
+            </p>
+            <span className="text-[10px] text-[var(--text-muted)] truncate">
+              {daysSinceLastCrisis !== null
+                ? (daysSinceLastCrisis === 0 ? 'Hoje' : daysSinceLastCrisis === 1 ? 'Ontem' : `desde ${format(parseISO(lastCrisisDate!), 'dd/MM')}`)
+                : 'Sem crises'}
+            </span>
           </div>
 
-          <div className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center">
-            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Com Registro</p>
+          {/* KPI 2: Dias Livres */}
+          <div className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center flex flex-col justify-between">
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider truncate">Dias Livres</p>
+            <p className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+              {painFreeDays}d
+            </p>
+            <span className="text-[10px] text-[var(--text-muted)] truncate">
+              {painFreePercentage}% do mês
+            </span>
+          </div>
+
+          {/* KPI 3: Com Registro */}
+          <div className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center flex flex-col justify-between">
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider truncate">Com Registro</p>
             <p className="text-sm sm:text-base font-bold text-[var(--text-primary)] mt-0.5">
               {daysWithCrisis} dia{daysWithCrisis === 1 ? '' : 's'}
             </p>
+            <span className="text-[10px] text-[var(--text-muted)] truncate">
+              neste mês
+            </span>
           </div>
 
-          <div className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center">
-            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider">Média de Dor</p>
+          {/* KPI 4: Média de Dor */}
+          <div className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] text-center flex flex-col justify-between">
+            <p className="text-[10px] uppercase font-semibold text-[var(--text-muted)] tracking-wider truncate">Média de Dor</p>
             <p className="text-sm sm:text-base font-bold text-[var(--color-below)] mt-0.5">
               {monthAvgIntensity !== '—' ? `${monthAvgIntensity}/10` : '—'}
             </p>
+            <span className="text-[10px] text-[var(--text-muted)] truncate">
+              escala 1 a 10
+            </span>
           </div>
         </div>
 
@@ -302,8 +343,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       </div>
 
-      {/* SECTION BELOW CALENDAR: Details of the Selected Day */}
-      <div className="glass p-4 sm:p-5 space-y-3.5 animate-in">
+      {/* SECTION: Details of the Selected Day (Unified inside Calendar Card) */}
+      <div className="pt-6 border-t border-[var(--card-border)] space-y-3.5">
         
         {/* Header of details */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--card-border)]">
