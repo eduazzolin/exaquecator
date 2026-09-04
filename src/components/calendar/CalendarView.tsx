@@ -15,7 +15,8 @@ import {
   AlertTriangle,
   FileText,
   CheckCircle2,
-  Clock
+  Clock,
+  X
 } from 'lucide-react';
 import { 
   startOfMonth, 
@@ -78,13 +79,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const daysWithCrisis = new Set(currentMonthCrises.map(c => c.date)).size;
   const painFreeDays = Math.max(0, totalDaysInMonth - daysWithCrisis);
 
-  // Selected Day's record
-  const selectedCrisis = crises.find(c => c.date === selectedDate);
+  // Selected Day's record in Calendar (only active when clicked by user)
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState<string | null>(null);
+  const activeCrisis = selectedCalendarDay ? crises.find(c => c.date === selectedCalendarDay) : null;
 
   const handleDelete = async () => {
-    if (!selectedCrisis) return;
-    if (window.confirm(`Deseja excluir o registro do dia ${formatDateFull(selectedDate)}?`)) {
-      await deleteCrisis(selectedCrisis.id);
+    if (!activeCrisis || !selectedCalendarDay) return;
+    if (window.confirm(`Deseja excluir o registro do dia ${formatDateFull(selectedCalendarDay)}?`)) {
+      await deleteCrisis(activeCrisis.id);
     }
   };
 
@@ -116,7 +118,9 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               onClick={() => {
                 const now = new Date();
                 setCurrentMonth(now);
-                onSelectDate(format(now, 'yyyy-MM-dd'));
+                const todayStr = format(now, 'yyyy-MM-dd');
+                setSelectedCalendarDay(todayStr);
+                onSelectDate(todayStr);
               }}
               className="px-2.5 py-1 rounded-md bg-[var(--bg-secondary)] hover:bg-[var(--card-border)] text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors hidden sm:block border border-[var(--card-border)]"
             >
@@ -218,7 +222,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               const formattedDayStr = format(day, 'yyyy-MM-dd');
               const isCurrentMonthDay = isSameMonth(day, monthStart);
               const isToday = isSameDay(day, new Date());
-              const isSelected = formattedDayStr === selectedDate;
+              const isSelected = formattedDayStr === selectedCalendarDay;
               const dayCrises = getCrisesForDay(day);
               const crisis = dayCrises[0];
               const intensity = crisis?.intensity ?? null;
@@ -255,7 +259,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 <button
                   key={day.toISOString()}
                   onClick={() => {
-                    onSelectDate(formattedDayStr);
+                    if (selectedCalendarDay === formattedDayStr) {
+                      setSelectedCalendarDay(null);
+                    } else {
+                      setSelectedCalendarDay(formattedDayStr);
+                      onSelectDate(formattedDayStr);
+                    }
                   }}
                   className={`min-h-[48px] sm:min-h-[56px] p-1 sm:p-1.5 rounded-md border text-left transition-all relative flex flex-col justify-between ${
                     !isCurrentMonthDay
@@ -343,165 +352,176 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
       </div>
 
-      {/* SECTION: Details of the Selected Day (Unified inside Calendar Card) */}
-      <div className="pt-6 border-t border-[var(--card-border)] space-y-3.5">
-        
-        {/* Header of details */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--card-border)]">
-          <div>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
-              Detalhes do Dia Selecionado
-            </span>
-            <h4 className="text-sm sm:text-base font-semibold text-[var(--text-primary)] mt-0.5 flex items-center gap-2">
-              <CalendarIcon className="w-4 h-4 text-[var(--text-secondary)]" />
-              {formatDateFull(selectedDate)}
-            </h4>
-          </div>
+      {/* SECTION: Details of the Selected Day (Only appears when a calendar day is clicked) */}
+      {selectedCalendarDay && (
+        <div className="pt-6 border-t border-[var(--card-border)] space-y-3.5 animate-in">
+          
+          {/* Header of details */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-[var(--card-border)]">
+            <div>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">
+                Detalhes do Dia Selecionado
+              </span>
+              <h4 className="text-sm sm:text-base font-semibold text-[var(--text-primary)] mt-0.5 flex items-center gap-2">
+                <CalendarIcon className="w-4 h-4 text-[var(--text-secondary)]" />
+                {formatDateFull(selectedCalendarDay)}
+              </h4>
+            </div>
 
-          <div className="flex items-center gap-2">
-            {selectedCrisis ? (
-              <>
+            <div className="flex items-center gap-2">
+              {activeCrisis ? (
+                <>
+                  <button
+                    onClick={() => onEditInForm(selectedCalendarDay)}
+                    className="btn btn-secondary text-xs py-1.5 px-3"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Editar no Formulário</span>
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="p-1.5 rounded-md border border-rose-500/20 bg-rose-500/10 text-[var(--color-below)] hover:bg-rose-500/20 transition-colors"
+                    title="Excluir este registro"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </>
+              ) : (
                 <button
-                  onClick={() => onEditInForm(selectedDate)}
-                  className="btn btn-secondary text-xs py-1.5 px-3"
+                  onClick={() => onEditInForm(selectedCalendarDay)}
+                  className="btn btn-primary text-xs py-1.5 px-3"
                 >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  <span>Editar no Formulário</span>
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Registrar este Dia</span>
                 </button>
-                <button
-                  onClick={handleDelete}
-                  className="p-1.5 rounded-md border border-rose-500/20 bg-rose-500/10 text-[var(--color-below)] hover:bg-rose-500/20 transition-colors"
-                  title="Excluir este registro"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </>
-            ) : (
+              )}
+
               <button
-                onClick={() => onEditInForm(selectedDate)}
-                className="btn btn-primary text-xs py-1.5 px-3"
+                type="button"
+                onClick={() => setSelectedCalendarDay(null)}
+                className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)] border border-transparent hover:border-[var(--card-border)] transition-colors ml-1"
+                title="Fechar detalhes do dia"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Registrar este Dia</span>
+                <X className="w-4 h-4" />
               </button>
-            )}
+            </div>
           </div>
+
+          {/* Content of details */}
+          {activeCrisis ? (
+            <div className="space-y-3">
+              
+              {/* Type, Intensity, and Start Time Badges */}
+              <div className="flex flex-wrap items-center gap-2">
+                {activeCrisis.startTime && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)]">
+                    <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
+                    {formatPeriod(activeCrisis.startTime)}
+                  </span>
+                )}
+
+                {activeCrisis.type && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)]">
+                    {activeCrisis.type === 'presenca' && '🌫️ Presença'}
+                    {activeCrisis.type === 'dor' && '💥 Dor'}
+                    {activeCrisis.type === 'aura' && '✨ Aura'}
+                  </span>
+                )}
+
+                <IntensityBadge level={activeCrisis.intensity} showLabel />
+              </div>
+
+              {/* Medications Taken */}
+              {activeCrisis.medicationsTaken && activeCrisis.medicationsTaken.length > 0 && (
+                <div className="space-y-1.5 p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)]">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
+                    <Pill className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                    Medicamentos Tomados
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeCrisis.medicationsTaken.map((m, idx) => {
+                      const reliefMap = {
+                        total: '🌟 Alívio Total',
+                        partial: '⚖️ Alívio Parcial',
+                        none: '❌ Sem Alívio',
+                        unknown: ''
+                      };
+                      const reliefText = m.relief && reliefMap[m.relief] ? ` • ${reliefMap[m.relief]}` : '';
+                      const qty = m.quantity && m.quantity > 1 ? `${m.quantity}x ` : '';
+                      return (
+                        <span
+                          key={idx}
+                          className="px-2.5 py-1 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-primary)]"
+                        >
+                          💊 {qty}<strong>{m.name}</strong> {m.dosage ? `(${m.dosage})` : ''}
+                          <span className="text-[11px] text-[var(--text-muted)]">{reliefText}</span>
+                        </span>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Symptoms and Triggers */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {activeCrisis.symptoms && activeCrisis.symptoms.length > 0 && (
+                  <div className="p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-[var(--text-secondary)]" /> Sintomas
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {activeCrisis.symptoms.map((s, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-secondary)]">
+                          {s}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {activeCrisis.triggers && activeCrisis.triggers.length > 0 && (
+                  <div className="p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] space-y-1">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1">
+                      <AlertTriangle className="w-3 h-3 text-amber-500" /> Gatilhos
+                    </p>
+                    <div className="flex flex-wrap gap-1">
+                      {activeCrisis.triggers.map((t, idx) => (
+                        <span key={idx} className="px-2 py-0.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-amber-600 dark:text-amber-300">
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Notes */}
+              {activeCrisis.notes && (
+                <div className="p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1">
+                    <FileText className="w-3 h-3 text-[var(--text-muted)]" /> Observações
+                  </p>
+                  <p className="text-xs text-[var(--text-secondary)] whitespace-pre-wrap">
+                    {activeCrisis.notes}
+                  </p>
+                </div>
+              )}
+
+            </div>
+          ) : (
+            <div className="py-4 text-center space-y-1">
+              <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
+              <p className="text-xs font-semibold text-[var(--text-primary)]">
+                Nenhum registro de crise salvo para este dia
+              </p>
+              <p className="text-[11px] text-[var(--text-muted)]">
+                Clique em &quot;Registrar este Dia&quot; se desejar adicionar sintomas, dor ou remédios tomados.
+              </p>
+            </div>
+          )}
+
         </div>
-
-        {/* Content of details */}
-        {selectedCrisis ? (
-          <div className="space-y-3">
-            
-            {/* Type, Intensity, and Start Time Badges */}
-            <div className="flex flex-wrap items-center gap-2">
-              {selectedCrisis.startTime && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)]">
-                  <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
-                  {formatPeriod(selectedCrisis.startTime)}
-                </span>
-              )}
-
-              {selectedCrisis.type && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)]">
-                  {selectedCrisis.type === 'presenca' && '🌫️ Presença'}
-                  {selectedCrisis.type === 'dor' && '💥 Dor'}
-                  {selectedCrisis.type === 'aura' && '✨ Aura'}
-                </span>
-              )}
-
-              <IntensityBadge level={selectedCrisis.intensity} showLabel />
-            </div>
-
-            {/* Medications Taken */}
-            {selectedCrisis.medicationsTaken && selectedCrisis.medicationsTaken.length > 0 && (
-              <div className="space-y-1.5 p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)]">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
-                  <Pill className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                  Medicamentos Tomados
-                </p>
-                <div className="flex flex-wrap gap-1.5">
-                  {selectedCrisis.medicationsTaken.map((m, idx) => {
-                    const reliefMap = {
-                      total: '🌟 Alívio Total',
-                      partial: '⚖️ Alívio Parcial',
-                      none: '❌ Sem Alívio',
-                      unknown: ''
-                    };
-                    const reliefText = m.relief && reliefMap[m.relief] ? ` • ${reliefMap[m.relief]}` : '';
-                    const qty = m.quantity && m.quantity > 1 ? `${m.quantity}x ` : '';
-                    return (
-                      <span
-                        key={idx}
-                        className="px-2.5 py-1 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-primary)]"
-                      >
-                        💊 {qty}<strong>{m.name}</strong> {m.dosage ? `(${m.dosage})` : ''}
-                        <span className="text-[11px] text-[var(--text-muted)]">{reliefText}</span>
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* Symptoms and Triggers */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-              {selectedCrisis.symptoms && selectedCrisis.symptoms.length > 0 && (
-                <div className="p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1">
-                    <Sparkles className="w-3 h-3 text-[var(--text-secondary)]" /> Sintomas
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedCrisis.symptoms.map((s, idx) => (
-                      <span key={idx} className="px-2 py-0.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-[var(--text-secondary)]">
-                        {s}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedCrisis.triggers && selectedCrisis.triggers.length > 0 && (
-                <div className="p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] space-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3 text-amber-500" /> Gatilhos
-                  </p>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedCrisis.triggers.map((t, idx) => (
-                      <span key={idx} className="px-2 py-0.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-xs text-amber-600 dark:text-amber-300">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Notes */}
-            {selectedCrisis.notes && (
-              <div className="p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1">
-                  <FileText className="w-3 h-3 text-[var(--text-muted)]" /> Observações
-                </p>
-                <p className="text-xs text-[var(--text-secondary)] whitespace-pre-wrap">
-                  {selectedCrisis.notes}
-                </p>
-              </div>
-            )}
-
-          </div>
-        ) : (
-          <div className="py-4 text-center space-y-1">
-            <CheckCircle2 className="w-6 h-6 text-emerald-500 mx-auto" />
-            <p className="text-xs font-semibold text-[var(--text-primary)]">
-              Nenhum registro de crise salvo para este dia
-            </p>
-            <p className="text-[11px] text-[var(--text-muted)]">
-              Clique em &quot;Registrar este Dia&quot; se desejar adicionar sintomas, dor ou remédios tomados.
-            </p>
-          </div>
-        )}
-
-      </div>
+      )}
     </div>
   );
 };
