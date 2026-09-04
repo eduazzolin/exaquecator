@@ -5,7 +5,7 @@ import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor, PERIOD_OPTIONS } f
 import { formatDateFull } from '../../utils/dateUtils';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
-import { Plus, Minus, Pill, Save, Check, X, Clock, Trash2, CheckCircle2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Minus, Pill, Save, Check, X, Trash2, CheckCircle2, ChevronDown, ChevronUp, Sparkles, Pencil } from 'lucide-react';
 
 interface CrisisFormProps {
   selectedDate: string;
@@ -176,89 +176,119 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   const currentColor = intensity !== null ? getIntensityColor(intensity) : null;
 
   return (
-    <div className="glass p-5 sm:p-6 space-y-5">
+    <div
+      className={`p-4 sm:p-6 space-y-5 rounded-2xl shadow-sm transition-all duration-200 border ${
+        existingCrisis
+          ? 'bg-amber-500/[0.04] dark:bg-amber-500/[0.07] border-amber-500/40 ring-1 ring-amber-500/25 shadow-md shadow-amber-500/5'
+          : 'glass border-[var(--card-border)]'
+      }`}
+    >
+      {/* Banner Exclusivo do Modo de Edição */}
+      {existingCrisis && (
+        <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-medium animate-in">
+          <div className="flex items-center gap-2">
+            <Pencil className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span><strong>Modo de Edição:</strong> Você está alterando o registro existente deste dia.</span>
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-wider bg-amber-500/20 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-md border border-amber-500/30 shrink-0">
+            Editando
+          </span>
+        </div>
+      )}
       
-      {/* Top Header: Date, Time & Quick Status */}
+      {/* 1. Barra Superior: Data, Período e Status */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--card-border)]">
-        <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-3">
+          {/* Seletor de Data */}
           <div>
-            <label className="form-label">
-              Data Selecionada
-            </label>
             <MiniDatePicker
               value={selectedDate}
               onChange={onDateChange}
             />
           </div>
 
-          <div>
-            <label className="form-label flex items-center gap-1">
-              <Clock className="w-3 h-3 text-[var(--text-secondary)]" />
-              Período
-            </label>
-            <div className="flex items-center gap-1">
-              {PERIOD_OPTIONS.map(opt => {
-                const isSelected = startTime === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => setStartTime(isSelected ? '' : opt.id)}
-                    className={`px-2.5 py-1.5 h-[34px] rounded-md text-xs font-medium border transition-all flex items-center gap-1.5 ${
-                      isSelected
-                        ? 'bg-[var(--accent)] text-white border-[var(--accent)] shadow-sm'
-                        : 'bg-[var(--card-bg)] text-[var(--text-secondary)] border-[var(--card-border)] hover:border-[var(--card-border-hover)] hover:text-[var(--text-primary)]'
-                    }`}
-                  >
-                    <span>{opt.icon}</span>
-                    <span>{opt.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+          {/* Segmented Control de Período */}
+          <div className="flex items-center p-1 bg-[var(--bg-secondary)] border border-[var(--card-border)] rounded-xl text-xs">
+            {PERIOD_OPTIONS.map(opt => {
+              const isSelected = startTime === opt.id;
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => setStartTime(isSelected ? '' : opt.id)}
+                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 ${
+                    isSelected
+                      ? 'bg-[var(--card-bg)] text-[var(--text-primary)] shadow-sm font-semibold border border-[var(--card-border)]'
+                      : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                  }`}
+                >
+                  <span>{opt.icon}</span>
+                  <span>{opt.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
+        {/* Status / Ação Rápida */}
         <div className="flex items-center gap-2 self-start sm:self-center">
           {existingCrisis ? (
-            <>
-              <span className="badge bg-emerald-500/10 text-[var(--color-above)] border border-emerald-500/20">
-                <Check className="w-3 h-3" /> Dia Registrado
-              </span>
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="p-1.5 rounded-md border border-rose-500/20 bg-rose-500/10 text-[var(--color-below)] hover:bg-rose-500/20 transition-colors"
-                title="Excluir registro deste dia"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </>
+            <span className="badge bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs px-2.5 py-1">
+              <Pencil className="w-3.5 h-3.5" /> Registro Existente
+            </span>
           ) : (
             <button
               type="button"
               onClick={handleMarkPainFree}
-              className="badge bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors"
+              className="badge bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors text-xs px-2.5 py-1 cursor-pointer"
             >
-              <CheckCircle2 className="w-3 h-3" /> Dia Livre de Dor
+              <CheckCircle2 className="w-3.5 h-3.5" /> Dia Livre de Dor
             </button>
           )}
         </div>
       </div>
 
-      {/* Main Fast Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Formulário Principal Direto na Tela */}
+      <form onSubmit={handleSubmit} className="space-y-5">
         
-        {/* 1. TIPO DO EPISÓDIO */}
-        <div className="space-y-1.5">
-          <label className="form-label mb-0">
-            Tipo do Episódio
-          </label>
-          <div className="grid grid-cols-3 gap-2">
+        {/* 2. TIPO DO EPISÓDIO COM IDENTIDADE CLÍNICA */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
+              Tipo do Episódio
+            </label>
+            <span className="text-[11px] text-[var(--text-muted)]">Toque para selecionar</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
             {[
-              { id: 'presenca' as CrisisType, label: 'Presença', emoji: '🌫️', desc: 'Sensação / Pródromo' },
-              { id: 'dor' as CrisisType, label: 'Dor', emoji: '💥', desc: 'Cefaleia / Enxaqueca' },
-              { id: 'aura' as CrisisType, label: 'Aura', emoji: '✨', desc: 'Visual / Sensorial' }
+              {
+                id: 'presenca' as CrisisType,
+                label: 'Presença',
+                emoji: '🌫️',
+                desc: 'Sensação ou pródromo',
+                selectedClasses: 'border-sky-500/50 bg-sky-500/10 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30',
+                badgeClasses: 'bg-sky-500 text-white dark:text-slate-900',
+                descClasses: 'text-sky-600/80 dark:text-sky-300/80'
+              },
+              {
+                id: 'dor' as CrisisType,
+                label: 'Dor',
+                emoji: '💥',
+                desc: 'Cefaleia ou enxaqueca',
+                selectedClasses: 'border-rose-500/50 bg-rose-500/10 text-rose-700 dark:text-rose-300 ring-1 ring-rose-500/30',
+                badgeClasses: 'bg-rose-500 text-white dark:text-slate-900',
+                descClasses: 'text-rose-600/80 dark:text-rose-300/80'
+              },
+              {
+                id: 'aura' as CrisisType,
+                label: 'Aura',
+                emoji: '✨',
+                desc: 'Visual ou sensorial',
+                selectedClasses: 'border-violet-500/50 bg-violet-500/10 text-violet-700 dark:text-violet-300 ring-1 ring-violet-500/30',
+                badgeClasses: 'bg-violet-500 text-white dark:text-slate-900',
+                descClasses: 'text-violet-600/80 dark:text-violet-300/80'
+              }
             ].map(opt => {
               const isSelected = type === opt.id;
               return (
@@ -266,31 +296,49 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   key={opt.id}
                   type="button"
                   onClick={() => handleTypeClick(opt.id)}
-                  className={`py-2.5 px-3 rounded-md border text-left transition-all flex items-center justify-between gap-2 ${
+                  className={`p-3 sm:p-3.5 rounded-xl border text-left transition-all ${
                     isSelected
-                      ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] shadow-sm'
-                      : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] hover:bg-[var(--bg-secondary)]'
+                      ? `${opt.selectedClasses} shadow-sm`
+                      : 'bg-[var(--bg-secondary)] border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-base">{opt.emoji}</span>
-                    <span className="text-xs font-semibold">{opt.label}</span>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base sm:text-lg">{opt.emoji}</span>
+                      <span className="text-xs sm:text-sm font-semibold text-[var(--text-primary)]">{opt.label}</span>
+                    </div>
+                    {isSelected ? (
+                      <div className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${opt.badgeClasses}`}>
+                        <Check className="w-2.5 h-2.5 stroke-[3]" />
+                      </div>
+                    ) : (
+                      <div className="w-3.5 h-3.5 rounded-full border border-[var(--card-border)]" />
+                    )}
                   </div>
-                  {isSelected && <Check className="w-3.5 h-3.5" />}
+                  <p className={`text-[11px] pl-6 sm:pl-7 ${isSelected ? opt.descClasses : 'text-[var(--text-muted)]'}`}>
+                    {opt.desc}
+                  </p>
                 </button>
               );
             })}
           </div>
         </div>
 
-        {/* 2. MEDICAMENTOS TOMADOS (1-Tap Toggle) */}
-        <div className="space-y-1.5">
-          <label className="form-label mb-0 flex items-center gap-1.5">
-            <Pill className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-            Remédios Tomados
-          </label>
+        {/* 3. MEDICAMENTOS TOMADOS */}
+        <div className="space-y-2.5">
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase flex items-center gap-1.5">
+              <Pill className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+              Remédios Tomados
+            </label>
+            {medicationsTaken.length > 0 && (
+              <span className="text-[11px] font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-md border border-indigo-500/20">
+                {medicationsTaken.length} {medicationsTaken.length === 1 ? 'medicamento' : 'medicamentos'}
+              </span>
+            )}
+          </div>
 
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center gap-2">
             {medications.map(med => {
               const isSelected = medicationsTaken.some(m => m.name.toLowerCase() === med.name.toLowerCase());
               return (
@@ -298,15 +346,19 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                   key={med.id}
                   type="button"
                   onClick={() => toggleMedication(med.name, med.dosage, med.id)}
-                  className={`text-xs px-2.5 py-1.5 rounded-md border transition-all flex items-center gap-1.5 ${
+                  className={`text-xs px-3 py-1.5 rounded-lg border transition-all flex items-center gap-1.5 ${
                     isSelected
-                      ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border-[var(--color-primary)] font-medium shadow-sm'
-                      : 'bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                      ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-700 dark:text-indigo-300 font-medium shadow-sm'
+                      : 'bg-[var(--bg-secondary)] border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
                   }`}
                 >
                   <span>💊 {med.name}</span>
-                  {med.dosage && <span className="text-[10px] opacity-75">({med.dosage})</span>}
-                  {isSelected && <Check className="w-3 h-3" />}
+                  {med.dosage && (
+                    <span className={`text-[10px] ${isSelected ? 'text-indigo-600/80 dark:text-indigo-300/80' : 'text-[var(--text-muted)]'}`}>
+                      ({med.dosage})
+                    </span>
+                  )}
+                  {isSelected && <Check className="w-3 h-3 text-indigo-600 dark:text-indigo-400" />}
                 </button>
               );
             })}
@@ -315,20 +367,20 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
               <button
                 type="button"
                 onClick={() => setIsAddingCustomMed(true)}
-                className="text-xs px-2.5 py-1.5 rounded-md border border-dashed border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all flex items-center gap-1"
+                className="text-xs px-2.5 py-1.5 rounded-lg border border-dashed border-[var(--card-border)] text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)] transition-all flex items-center gap-1"
               >
                 <Plus className="w-3 h-3" />
                 <span>Outro remédio</span>
               </button>
             ) : (
-              <div className="flex items-center gap-1 flex-wrap">
+              <div className="flex items-center gap-1.5 p-1 bg-[var(--bg-secondary)] rounded-lg border border-[var(--card-border)] flex-wrap">
                 <input
                   type="text"
                   placeholder="Nome do remédio"
                   value={customMedName}
                   onChange={e => setCustomMedName(e.target.value)}
                   autoFocus
-                  className="input-field text-xs py-1 px-2 w-32 h-[30px]"
+                  className="input-field text-xs py-1 px-2.5 w-32 h-[30px]"
                 />
                 <input
                   type="text"
@@ -340,14 +392,14 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                 <button
                   type="button"
                   onClick={() => handleAddCustomMed()}
-                  className="btn btn-primary text-xs py-1 px-2 h-[30px]"
+                  className="btn btn-primary text-xs py-1 px-2.5 h-[30px]"
                 >
                   Adicionar
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsAddingCustomMed(false)}
-                  className="p-1 text-[var(--text-muted)]"
+                  className="p-1 text-[var(--text-muted)] hover:text-[var(--text-primary)]"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -359,26 +411,30 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           {medicationsTaken.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
               {medicationsTaken.map((m, idx) => (
-                <div key={idx} className="p-2.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] flex items-center justify-between gap-2">
+                <div key={idx} className="p-2.5 sm:p-3 rounded-xl bg-[var(--bg-secondary)] border border-[var(--card-border)] flex items-center justify-between gap-2.5 shadow-sm">
                   <div className="truncate">
-                    <p className="text-xs font-semibold text-[var(--text-primary)] truncate">💊 {m.name}</p>
+                    <p className="text-xs font-semibold text-[var(--text-primary)] truncate flex items-center gap-1">
+                      <span>💊</span> {m.name}
+                    </p>
                     <p className="text-[10px] text-[var(--text-muted)]">{m.dosage || 'Dose padrão'}</p>
                   </div>
 
-                  <div className="flex items-center gap-1.5">
-                    <div className="flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] px-1 rounded">
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1 bg-[var(--card-bg)] border border-[var(--card-border)] px-1 py-0.5 rounded-lg shadow-inner">
                       <button
                         type="button"
                         onClick={() => handleUpdateMedQuantity(idx, -1)}
-                        className="w-4 h-4 rounded text-xs flex items-center justify-center hover:bg-[var(--bg-secondary)]"
+                        className="w-5 h-5 rounded text-xs flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+                        title="Diminuir"
                       >
                         <Minus className="w-2.5 h-2.5" />
                       </button>
-                      <span className="text-xs font-semibold w-3 text-center">{m.quantity || 1}</span>
+                      <span className="text-xs font-bold w-4 text-center text-[var(--text-primary)]">{m.quantity || 1}</span>
                       <button
                         type="button"
                         onClick={() => handleUpdateMedQuantity(idx, 1)}
-                        className="w-4 h-4 rounded text-xs flex items-center justify-center hover:bg-[var(--bg-secondary)]"
+                        className="w-5 h-5 rounded text-xs flex items-center justify-center text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]"
+                        title="Aumentar"
                       >
                         <Plus className="w-2.5 h-2.5" />
                       </button>
@@ -387,7 +443,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                     <select
                       value={m.relief || 'total'}
                       onChange={e => handleUpdateMedRelief(idx, e.target.value as ReliefLevel)}
-                      className="text-[11px] py-1 px-1.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)] outline-none"
+                      className="text-xs py-1 px-2 rounded-lg bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)] outline-none shadow-sm cursor-pointer"
                     >
                       <option value="total">🌟 Total</option>
                       <option value="partial">⚖️ Parcial</option>
@@ -397,7 +453,8 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                     <button
                       type="button"
                       onClick={() => handleRemoveMed(idx)}
-                      className="p-1 text-[var(--text-muted)] hover:text-[var(--color-below)]"
+                      className="p-1 rounded-md text-[var(--text-muted)] hover:text-[var(--color-below)] hover:bg-rose-500/10 transition-colors"
+                      title="Remover"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -408,32 +465,54 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           )}
         </div>
 
-        {/* 3. EXPANSOR: INTENSIDADE, SINTOMAS, GATILHOS E NOTAS */}
-        <div className="border-t border-[var(--card-border)] pt-2">
+        {/* 4. SEÇÃO RETRÁTIL: INTENSIDADE, SINTOMAS, GATILHOS E NOTAS */}
+        <div className="border border-[var(--card-border)] rounded-xl bg-[var(--bg-secondary)]/40 overflow-hidden transition-all">
           <button
             type="button"
             onClick={() => setShowAdvanced(!showAdvanced)}
-            className="text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] flex items-center gap-1.5 py-1"
+            className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-[var(--bg-secondary)] transition-colors"
           >
-            <span>
-              {showAdvanced
-                ? 'Ocultar Intensidade, Sintomas, Gatilhos e Notas'
-                : `+ Adicionar Intensidade${intensity !== null ? ` (${intensity}/10)` : ''}, Sintomas, Gatilhos e Notas`}
-            </span>
-            {showAdvanced ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Sparkles className="w-4 h-4 text-[var(--text-secondary)]" />
+              <span className="text-xs font-semibold text-[var(--text-primary)]">
+                Intensidade, Sintomas, Gatilhos e Notas
+              </span>
+              <span className="text-[10px] text-[var(--text-muted)] font-normal hidden sm:inline">
+                • Opcional
+              </span>
+              {intensity !== null && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30">
+                  Dor {intensity}/10
+                </span>
+              )}
+              {symptoms.length > 0 && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30">
+                  {symptoms.length} {symptoms.length === 1 ? 'sintoma' : 'sintomas'}
+                </span>
+              )}
+              {triggers.length > 0 && (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                  {triggers.length} {triggers.length === 1 ? 'gatilho' : 'gatilhos'}
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+              <span>{showAdvanced ? 'Recolher' : 'Expandir'}</span>
+              {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </div>
           </button>
 
           {showAdvanced && (
-            <div className="space-y-4 pt-3 animate-in">
-              
+            <div className="p-4 pt-3 border-t border-[var(--card-border)] space-y-4 animate-in">
               {/* Intensidade da Dor */}
-              <div className="space-y-1.5 p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)]">
+              <div className="space-y-2 p-3 sm:p-3.5 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)]">
                 <div className="flex items-center justify-between">
-                  <label className="form-label mb-0">
+                  <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
                     Intensidade da Dor (1 a 10)
                   </label>
                   {intensity !== null ? (
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
+                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
                       {intensity}/10 • {currentColor?.label}
                     </span>
                   ) : (
@@ -449,10 +528,10 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                         key={num}
                         type="button"
                         onClick={() => handleIntensityClick(num)}
-                        className={`h-8 sm:h-9 rounded-md text-xs font-semibold transition-all ${
+                        className={`h-9 sm:h-10 rounded-lg text-xs font-bold transition-all ${
                           isSelected
-                            ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-sm scale-105'
-                            : 'bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
+                            ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-md scale-105'
+                            : 'bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
                         }`}
                       >
                         {num}
@@ -495,15 +574,43 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         </div>
 
         {/* 5. BARRA DE SALVAR */}
-        <div className="pt-2 flex items-center justify-end gap-2">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="btn btn-primary text-xs py-2.5 px-5 shadow-sm font-semibold"
-          >
-            <Save className="w-3.5 h-3.5" />
-            <span>{isSubmitting ? 'Salvando...' : (existingCrisis ? 'Atualizar Registro' : 'Salvar Registro')}</span>
-          </button>
+        <div className="pt-3 border-t border-[var(--card-border)] flex items-center justify-between flex-wrap gap-3">
+          <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
+            {existingCrisis ? (
+              <span className="text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1.5">
+                <Pencil className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span>Alterando registro do dia <strong>{formatDateFull(selectedDate)}</strong></span>
+              </span>
+            ) : (
+              <span>Preenchimento ágil • Diário direto na tela inicial</span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            {existingCrisis && (
+              <button
+                type="button"
+                onClick={handleDelete}
+                className="px-3 py-2 rounded-xl text-xs font-semibold border border-rose-500/20 bg-rose-500/10 text-[var(--color-below)] hover:bg-rose-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Excluir</span>
+              </button>
+            )}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className={`text-xs py-2 px-5 rounded-xl shadow-md font-semibold transition-all active:scale-95 flex items-center gap-2 cursor-pointer ${
+                existingCrisis
+                  ? 'bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold shadow-amber-500/20'
+                  : 'btn btn-primary'
+              }`}
+            >
+              <Save className="w-3.5 h-3.5" />
+              <span>{isSubmitting ? 'Salvando...' : (existingCrisis ? 'Atualizar Registro' : 'Salvar Registro')}</span>
+            </button>
+          </div>
         </div>
 
       </form>
