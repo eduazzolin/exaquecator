@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { CrisisRecord } from '../../types';
 import { IntensityBadge } from '../common/IntensityBadge';
 import { formatDateFull, getDaysSinceLastCrisis } from '../../utils/dateUtils';
@@ -37,6 +37,8 @@ import { useData } from '../../context/DataContext';
 interface CalendarViewProps {
   crises: CrisisRecord[];
   selectedDate: string;
+  selectedCalendarDay?: string | null;
+  onSelectCalendarDay?: (date: string | null) => void;
   onSelectDate: (date: string) => void;
   onEditInForm: (date: string) => void;
 }
@@ -44,10 +46,26 @@ interface CalendarViewProps {
 export const CalendarView: React.FC<CalendarViewProps> = ({ 
   crises, 
   selectedDate, 
+  selectedCalendarDay: controlledSelectedCalendarDay,
+  onSelectCalendarDay,
   onSelectDate,
   onEditInForm
 }) => {
   const { deleteCrisis } = useData();
+
+  const [internalSelectedDay, setInternalSelectedDay] = useState<string | null>(null);
+
+  const selectedCalendarDay = controlledSelectedCalendarDay !== undefined 
+    ? controlledSelectedCalendarDay 
+    : internalSelectedDay;
+
+  const setSelectedCalendarDay = (day: string | null) => {
+    if (onSelectCalendarDay) {
+      onSelectCalendarDay(day);
+    } else {
+      setInternalSelectedDay(day);
+    }
+  };
 
   const [currentMonth, setCurrentMonth] = useState<Date>(() => {
     try {
@@ -56,6 +74,20 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
       return new Date();
     }
   });
+
+  // Sync currentMonth when selectedCalendarDay changes to a different month
+  useEffect(() => {
+    if (selectedCalendarDay) {
+      try {
+        const dateObj = parseISO(selectedCalendarDay);
+        if (!isSameMonth(dateObj, currentMonth)) {
+          setCurrentMonth(dateObj);
+        }
+      } catch (err) {
+        console.error('Error parsing selectedCalendarDay:', err);
+      }
+    }
+  }, [selectedCalendarDay]);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(monthStart);
@@ -80,7 +112,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const painFreeDays = Math.max(0, totalDaysInMonth - daysWithCrisis);
 
   // Selected Day's record in Calendar (only active when clicked by user)
-  const [selectedCalendarDay, setSelectedCalendarDay] = useState<string | null>(null);
   const activeCrisis = selectedCalendarDay ? crises.find(c => c.date === selectedCalendarDay) : null;
 
   const handleDelete = async () => {
@@ -100,7 +131,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const { days: daysSinceLastCrisis, latestDate: lastCrisisDate } = getDaysSinceLastCrisis(crises);
 
   return (
-    <div className="glass p-4 sm:p-6 space-y-6 animate-in">
+    <div id="calendar-card" className="glass p-4 sm:p-6 space-y-6 animate-in scroll-mt-20">
       {/* Calendar Section */}
       <div className="space-y-4">
         

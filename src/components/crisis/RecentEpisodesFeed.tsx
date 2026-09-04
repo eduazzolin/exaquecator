@@ -3,18 +3,17 @@ import { CrisisRecord } from '../../types';
 import { formatDateFull } from '../../utils/dateUtils';
 import { IntensityBadge } from '../common/IntensityBadge';
 import { formatPeriod } from '../../utils/constants';
-import { Calendar, Pill, Edit3 } from 'lucide-react';
+import { Calendar, Pill, ChevronRight } from 'lucide-react';
 
 interface RecentEpisodesFeedProps {
   crises: CrisisRecord[];
   onSelectDate: (date: string) => void;
-  onEditEpisode: (date: string) => void;
+  onEditEpisode?: (date: string) => void;
 }
 
 export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
   crises,
-  onSelectDate,
-  onEditEpisode
+  onSelectDate
 }) => {
   // Sort descending by date
   const sortedCrises = [...crises]
@@ -42,6 +41,7 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
               key={crisis.id}
               onClick={() => onSelectDate(crisis.date)}
               className="p-3.5 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] hover:border-[var(--card-border-hover)] transition-all cursor-pointer flex flex-col sm:flex-row sm:items-center justify-between gap-3 group"
+              title="Ver detalhes no calendário"
             >
               <div className="space-y-1.5 flex-1 min-w-0">
                 <div className="flex items-center gap-2">
@@ -75,18 +75,13 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-center">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEditEpisode(crisis.date);
-                  }}
-                  className="p-1.5 rounded-md text-[var(--text-muted)] hover:text-[var(--text-primary)] hover:bg-[var(--card-bg)] transition-colors opacity-80 group-hover:opacity-100"
-                  title="Editar episódio"
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                </button>
+              <div className="flex items-center gap-1.5 self-end sm:self-center text-[var(--text-muted)] group-hover:text-[var(--text-primary)] transition-colors">
+                <span className="text-xs hidden sm:inline opacity-0 group-hover:opacity-100 transition-opacity font-medium">
+                  Ver no calendário
+                </span>
+                <div className="p-1.5 rounded-md group-hover:bg-[var(--card-bg)] transition-colors">
+                  <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                </div>
               </div>
             </div>
           );

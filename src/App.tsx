@@ -17,6 +17,7 @@ export const App: React.FC = () => {
 
   const [activeTab, setActiveTab] = useState<'timeline' | 'analytics' | 'medications'>('timeline');
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
+  const [selectedCalendarDay, setSelectedCalendarDay] = useState<string | null>(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
@@ -54,6 +55,15 @@ export const App: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleSelectDateInCalendar = (date: string) => {
+    setSelectedCalendarDay(date);
+    setSelectedDate(date);
+    const calendarEl = document.getElementById('calendar-card');
+    if (calendarEl) {
+      calendarEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col pb-24 sm:pb-12 transition-colors duration-200">
       
@@ -87,6 +97,8 @@ export const App: React.FC = () => {
             <CalendarView
               crises={crises}
               selectedDate={selectedDate}
+              selectedCalendarDay={selectedCalendarDay}
+              onSelectCalendarDay={setSelectedCalendarDay}
               onSelectDate={setSelectedDate}
               onEditInForm={handleSelectDateForEdit}
             />
@@ -94,8 +106,7 @@ export const App: React.FC = () => {
             {/* 3. Feed dos Últimos Episódios */}
             <RecentEpisodesFeed
               crises={crises}
-              onSelectDate={handleSelectDateForEdit}
-              onEditEpisode={handleSelectDateForEdit}
+              onSelectDate={handleSelectDateInCalendar}
             />
 
           </div>
