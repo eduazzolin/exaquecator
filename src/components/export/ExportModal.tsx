@@ -56,10 +56,10 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const filtered = getFilteredCrises();
   const totalImagesCount = filtered.reduce((acc, c) => acc + (c.images?.length || 0), 0);
 
-  const handleExportPDF = () => {
+  const handleExportPDF = async () => {
     setIsExportingPDF(true);
     try {
-      generateMedicalReportPDF({
+      await generateMedicalReportPDF({
         patientName: patientName.trim() || 'Paciente',
         startDate: dateRangeOption !== 'all' ? format(subMonths(new Date(), dateRangeOption === '30days' ? 1 : dateRangeOption === '90days' ? 3 : 12), 'dd/MM/yyyy') : undefined,
         endDate: format(new Date(), 'dd/MM/yyyy'),

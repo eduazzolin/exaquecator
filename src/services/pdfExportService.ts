@@ -12,7 +12,24 @@ interface GeneratePDFOptions {
   includeImages?: boolean;
 }
 
-export const generateMedicalReportPDF = ({
+const ensureDataUrl = async (imgSrc: string): Promise<string> => {
+  if (imgSrc.startsWith('data:')) return imgSrc;
+  try {
+    const res = await fetch(imgSrc);
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = () => reject(new Error('Falha ao ler blob da imagem'));
+      reader.readAsDataURL(blob);
+    });
+  } catch (err) {
+    console.warn('Não foi possível converter imagem remota para dataUrl no PDF:', err);
+    return imgSrc;
+  }
+};
+
+export const generateMedicalReportPDF = async ({
   patientName = 'Paciente',
   startDate,
   endDate,
@@ -183,7 +200,7 @@ export const generateMedicalReportPDF = ({
 
       pageY = 28;
 
-      crisesWithImages.forEach(c => {
+      for (const c of crisesWithImages) {
         const typeLabel = c.type ? (typeMap[c.type] || c.type) : 'Episódio';
         const locText = c.painLocation ? ` [${c.painLocation}]` : '';
         const dateHeader = `${formatDateShort(c.date)} — ${typeLabel}${c.intensity !== null ? ` (Dor: ${c.intensity}/10${locText})` : locText}`;
@@ -211,18 +228,22 @@ export const generateMedicalReportPDF = ({
         const imgSize = 48; // mm
         let imgX = 14;
 
-        c.images?.forEach((imgBase64, imgIdx) => {
-          try {
-            const format = imgBase64.includes('image/png') ? 'PNG' : 'JPEG';
-            doc.addImage(imgBase64, format, imgX, pageY, imgSize, imgSize);
-            imgX += imgSize + 6;
-          } catch (e) {
-            console.warn(`Erro ao inserir imagem ${imgIdx + 1} no PDF:`, e);
+        if (c.images) {
+          for (let imgIdx = 0; imgIdx < c.images.length; imgIdx++) {
+            const rawImg = c.images[imgIdx];
+            try {
+              const dataUrl = await ensureDataUrl(rawImg);
+              const format = dataUrl.includes('image/png') ? 'PNG' : 'JPEG';
+              doc.addImage(dataUrl, format, imgX, pageY, imgSize, imgSize);
+              imgX += imgSize + 6;
+            } catch (e) {
+              console.warn(`Erro ao inserir imagem ${imgIdx + 1} no PDF:`, e);
+            }
           }
-        });
+        }
 
         pageY += imgSize + 10;
-      });
+      }
     }
   }
 

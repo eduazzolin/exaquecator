@@ -59,6 +59,33 @@ export const fetchCrisesFromStorage = async (userId?: string | null): Promise<Cr
   return getInitialCrises().sort((a, b) => b.date.localeCompare(a.date));
 };
 
+const safeSaveCrisesToLocalStorage = (list: CrisisRecord[]) => {
+  try {
+    localStorage.setItem(LOCAL_STORAGE_CRISES_KEY, JSON.stringify(list));
+  } catch (quotaErr) {
+    console.warn('Cota de LocalStorage excedida. Otimizando histórico local de imagens...', quotaErr);
+    try {
+      // Se estourar a cota de 5MB, preserva as fotos dos 5 registros mais recentes
+      // e remove strings pesadas dos registros mais antigos no cache local
+      const trimmedList = list.map((record, index) => {
+        if (index > 5 && record.images && record.images.length > 0) {
+          return { ...record, images: [] };
+        }
+        return record;
+      });
+      localStorage.setItem(LOCAL_STORAGE_CRISES_KEY, JSON.stringify(trimmedList));
+    } catch {
+      // Se ainda assim persistir, guarda os dados clínicos essenciais
+      const essentialsOnly = list.map(r => ({ ...r, images: [] }));
+      try {
+        localStorage.setItem(LOCAL_STORAGE_CRISES_KEY, JSON.stringify(essentialsOnly));
+      } catch (fatalErr) {
+        console.error('Falha crítica ao gravar no LocalStorage:', fatalErr);
+      }
+    }
+  }
+};
+
 export const saveCrisisToStorage = async (crisis: CrisisRecord, userId?: string | null): Promise<void> => {
   const localList = getInitialCrises();
   const existingIdx = localList.findIndex(c => c.id === crisis.id);
@@ -68,7 +95,7 @@ export const saveCrisisToStorage = async (crisis: CrisisRecord, userId?: string 
     localList.unshift(crisis);
   }
   localList.sort((a, b) => b.date.localeCompare(a.date));
-  localStorage.setItem(LOCAL_STORAGE_CRISES_KEY, JSON.stringify(localList));
+  safeSaveCrisesToLocalStorage(localList);
 
   if (isFirebaseConfigured && db && userId) {
     try {

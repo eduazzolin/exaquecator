@@ -1,6 +1,7 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, browserLocalPersistence, setPersistence } from 'firebase/auth';
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager } from 'firebase/firestore';
+import { getStorage, FirebaseStorage } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -21,6 +22,7 @@ export const isFirebaseConfigured = Boolean(
 let app: ReturnType<typeof initializeApp> | null = null;
 let auth: ReturnType<typeof getAuth> | null = null;
 let db: ReturnType<typeof initializeFirestore> | null = null;
+let storage: FirebaseStorage | null = null;
 let googleProvider: GoogleAuthProvider | null = null;
 
 if (isFirebaseConfigured) {
@@ -36,6 +38,11 @@ if (isFirebaseConfigured) {
       })
     });
 
+    // Initialize Firebase Storage if bucket is present
+    if (firebaseConfig.storageBucket) {
+      storage = getStorage(app);
+    }
+
     googleProvider = new GoogleAuthProvider();
     googleProvider.setCustomParameters({ prompt: 'select_account' });
   } catch (error) {
@@ -43,4 +50,4 @@ if (isFirebaseConfigured) {
   }
 }
 
-export { app, auth, db, googleProvider };
+export { app, auth, db, storage, googleProvider };

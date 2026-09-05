@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
+import { useAuth } from '../../context/AuthContext';
 import { MedicationTaken, ReliefLevel, CrisisType, PainLocation } from '../../types';
 import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor, PERIOD_OPTIONS } from '../../utils/constants';
 import { formatDateFull } from '../../utils/dateUtils';
-import { compressImage } from '../../utils/imageUtils';
+import { compressImageDetails } from '../../utils/imageUtils';
+import { uploadOrStoreImage } from '../../services/imageStorageService';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
 import { ImageLightboxModal } from '../common/ImageLightboxModal';
-import { Plus, Minus, Pill, Save, Check, X, Trash2, CheckCircle2, ChevronDown, ChevronUp, Sparkles, Pencil, Camera, Image as ImageIcon } from 'lucide-react';
+import { Plus, Minus, Pill, Save, Check, X, Trash2, CheckCircle2, ChevronDown, ChevronUp, Sparkles, Pencil, Camera, Image as ImageIcon, Loader2 } from 'lucide-react';
 
 interface CrisisFormProps {
   selectedDate: string;
@@ -19,6 +21,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   onDateChange
 }) => {
   const { crises, addCrisis, updateCrisis, deleteCrisis, medications } = useData();
+  const { user } = useAuth();
 
   // Find if there is an existing record for the selected date
   const existingCrisis = crises.find(c => c.date === selectedDate);
@@ -31,12 +34,14 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   const [triggers, setTriggers] = useState<string[]>([]);
   const [medicationsTaken, setMedicationsTaken] = useState<MedicationTaken[]>([]);
   const [images, setImages] = useState<string[]>([]);
+  const [imageBlobs, setImageBlobs] = useState<Map<string, Blob>>(new Map());
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Image upload and preview states
   const [isCompressingImage, setIsCompressingImage] = useState(false);
+  const [compressStatus, setCompressStatus] = useState<string>('');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
@@ -92,19 +97,28 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
 
     const filesToProcess = Array.from(files).slice(0, availableSlots);
     setIsCompressingImage(true);
+    setCompressStatus(`Otimizando ${filesToProcess.length === 1 ? 'imagem' : `${filesToProcess.length} imagens`}...`);
 
     try {
-      const compressedList: string[] = [];
-      for (const file of filesToProcess) {
-        const b64 = await compressImage(file);
-        compressedList.push(b64);
+      const newImages: string[] = [];
+      const updatedBlobs = new Map(imageBlobs);
+
+      for (let i = 0; i < filesToProcess.length; i++) {
+        const file = filesToProcess[i];
+        setCompressStatus(`Comprimindo imagem ${i + 1}/${filesToProcess.length}...`);
+        const result = await compressImageDetails(file, 800, 0.70);
+        newImages.push(result.base64);
+        updatedBlobs.set(result.base64, result.blob);
       }
-      setImages(prev => [...prev, ...compressedList].slice(0, 3));
+
+      setImages(prev => [...prev, ...newImages].slice(0, 3));
+      setImageBlobs(updatedBlobs);
     } catch (err) {
       console.error('Erro ao processar imagem:', err);
-      alert('Não foi possível processar a imagem selecionada.');
+      alert('Não foi possível processar a foto selecionada. Se o celular tiver pouca memória, tente tirar a foto com o app da Câmera e anexar pela Galeria.');
     } finally {
       setIsCompressingImage(false);
+      setCompressStatus('');
       if (cameraInputRef.current) {
         cameraInputRef.current.value = '';
       }
@@ -186,6 +200,21 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
     setIsSubmitting(true);
 
     try {
+      // Upload ou persistência local ultra-leve das fotos
+      let finalImages: string[] = [];
+      if (images.length > 0) {
+        finalImages = await Promise.all(
+          images.slice(0, 3).map((img, idx) =>
+            uploadOrStoreImage(
+              user?.uid,
+              selectedDate,
+              { base64: img, blob: imageBlobs.get(img) },
+              idx
+            )
+          )
+        );
+      }
+
       const isMilagre = type === 'milagre';
       const recordData = {
         date: selectedDate,
@@ -196,7 +225,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         symptoms: isMilagre ? [] : symptoms,
         triggers,
         medicationsTaken: isMilagre ? [] : medicationsTaken,
-        images: images.slice(0, 3),
+        images: finalImages,
         notes: notes.trim()
       };
 
@@ -244,14 +273,13 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           </span>
         </label>
 
-        {images.length < 3 && (
+        {images.length < 3 && !isCompressingImage && (
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
-              disabled={isCompressingImage}
               className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] cursor-pointer"
-              title="Abrir câmera para tirar foto no Android/iOS"
+              title="Tirar foto ou escolher da câmera"
             >
               <Camera className="w-3.5 h-3.5 text-sky-500" />
               <span>Tirar Foto</span>
@@ -259,7 +287,6 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             <button
               type="button"
               onClick={() => galleryInputRef.current?.click()}
-              disabled={isCompressingImage}
               className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] cursor-pointer"
               title="Escolher foto existente da galeria"
             >
@@ -269,6 +296,13 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           </div>
         )}
       </div>
+
+      {isCompressingImage && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-sky-500/10 border border-sky-500/25 text-sky-600 dark:text-sky-400 text-xs animate-in">
+          <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+          <span className="font-medium">{compressStatus || 'Otimizando imagem para formato ultra-leve...'}</span>
+        </div>
+      )}
 
       {images.length > 0 ? (
         <div className="flex items-center gap-3 overflow-x-auto py-1.5">
@@ -298,12 +332,11 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             </div>
           ))}
 
-          {images.length < 3 && (
+          {images.length < 3 && !isCompressingImage && (
             <div className="flex flex-col gap-1.5 shrink-0 justify-center">
               <button
                 type="button"
                 onClick={() => cameraInputRef.current?.click()}
-                disabled={isCompressingImage}
                 className="h-9 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
                 title="Tirar foto com a câmera"
               >
@@ -313,7 +346,6 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
               <button
                 type="button"
                 onClick={() => galleryInputRef.current?.click()}
-                disabled={isCompressingImage}
                 className="h-9 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
                 title="Escolher da galeria"
               >
@@ -324,27 +356,32 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-          <button
-            type="button"
-            onClick={() => cameraInputRef.current?.click()}
-            disabled={isCompressingImage}
-            className="py-3 px-3.5 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
-          >
-            <Camera className="w-4 h-4 text-sky-500" />
-            <span className="font-semibold">{isCompressingImage ? 'Processando foto...' : 'Tirar Foto Agora'}</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => galleryInputRef.current?.click()}
-            disabled={isCompressingImage}
-            className="py-3 px-3.5 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
-          >
-            <ImageIcon className="w-4 h-4 text-violet-500" />
-            <span className="font-semibold">{isCompressingImage ? 'Processando foto...' : 'Escolher da Galeria'}</span>
-          </button>
-        </div>
+        !isCompressingImage && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              className="py-3 px-3.5 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
+            >
+              <Camera className="w-4 h-4 text-sky-500" />
+              <span className="font-semibold">Tirar Foto</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => galleryInputRef.current?.click()}
+              className="py-3 px-3.5 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
+            >
+              <ImageIcon className="w-4 h-4 text-violet-500" />
+              <span className="font-semibold">Escolher da Galeria</span>
+            </button>
+          </div>
+        )
       )}
+
+      {/* Dica amigável de otimização e prevenção de falta de memória no Android */}
+      <p className="text-[10px] text-[var(--text-muted)] leading-relaxed pt-0.5">
+        💡 Fotos são otimizadas (~50 KB) para economizar dados e memória. Se o seu celular fechar ao abrir a câmera direta, tire a foto no app da Câmera e anexe pela <strong>Galeria</strong>.
+      </p>
     </div>
   );
 
@@ -877,12 +914,11 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           </div>
         )}
 
-        {/* Inputs ocultos para Câmera e Galeria com compatibilidade total Android/iOS/Desktop */}
+        {/* Inputs para Câmera e Galeria com seletor nativo seguro (sem forçar capture para não derrubar memória no Android) */}
         <input
           ref={cameraInputRef}
           type="file"
           accept="image/*"
-          capture="environment"
           onChange={handleFileChange}
           className="hidden"
         />
