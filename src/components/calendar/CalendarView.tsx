@@ -16,8 +16,10 @@ import {
   FileText,
   CheckCircle2,
   Clock,
-  X
+  X,
+  Camera
 } from 'lucide-react';
+import { ImageLightboxModal } from '../common/ImageLightboxModal';
 import { 
   startOfMonth, 
   endOfMonth, 
@@ -54,6 +56,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const { deleteCrisis } = useData();
 
   const [internalSelectedDay, setInternalSelectedDay] = useState<string | null>(null);
+  const [selectedDayImageIndex, setSelectedDayImageIndex] = useState<number | null>(null);
 
   const selectedCalendarDay = controlledSelectedCalendarDay !== undefined 
     ? controlledSelectedCalendarDay 
@@ -288,6 +291,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
               const hasMedications = Boolean(crisis?.medicationsTaken && crisis.medicationsTaken.length > 0);
               const totalMedsCount = crisis?.medicationsTaken ? crisis.medicationsTaken.reduce((acc, m) => acc + (m.quantity || 1), 0) : 0;
+              const hasImages = Boolean(crisis?.images && crisis.images.length > 0);
 
               return (
                 <button
@@ -322,6 +326,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                     </span>
 
                     <div className="flex items-center gap-0.5">
+                      {hasImages && (
+                        <span className="text-[10px]" title={`${crisis?.images?.length} foto(s) anexada(s)`}>
+                          📷
+                        </span>
+                      )}
                       {hasMedications && (
                         <span className="text-[10px]" title={`Remédios tomados: ${totalMedsCount} dose(s)`}>
                           💊
@@ -548,6 +557,28 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 </div>
               )}
 
+              {/* Attached Photos */}
+              {activeCrisis.images && activeCrisis.images.length > 0 && (
+                <div className="p-3 rounded-md bg-[var(--bg-secondary)] border border-[var(--card-border)] space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
+                    <Camera className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                    <span>Fotos Anexadas ({activeCrisis.images.length})</span>
+                  </p>
+                  <div className="flex items-center gap-2 overflow-x-auto py-1">
+                    {activeCrisis.images.map((img, idx) => (
+                      <img
+                        key={idx}
+                        src={img}
+                        alt={`Foto ${idx + 1}`}
+                        onClick={() => setSelectedDayImageIndex(idx)}
+                        className="w-16 h-16 rounded-lg object-cover cursor-pointer border border-[var(--card-border)] hover:scale-105 transition-transform shrink-0"
+                        title="Clique para ampliar"
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
             </div>
           ) : (
             <div className="py-4 text-center space-y-1">
@@ -563,6 +594,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
         </div>
       )}
+
+      {/* Modal de Zoom da Imagem (Lightbox) */}
+      <ImageLightboxModal
+        isOpen={selectedDayImageIndex !== null}
+        onClose={() => setSelectedDayImageIndex(null)}
+        images={activeCrisis?.images || []}
+        initialIndex={selectedDayImageIndex ?? 0}
+        title={selectedCalendarDay ? formatDateFull(selectedCalendarDay) : undefined}
+      />
     </div>
   );
 };

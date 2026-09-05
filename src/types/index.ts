@@ -35,6 +35,7 @@ export interface CrisisRecord {
   symptoms?: string[];
   triggers?: string[];
   medicationsTaken?: MedicationTaken[];
+  images?: string[]; // Fotos anexadas em Base64 comprimido (max 3)
   notes?: string;
   customFields?: Record<string, any>;
   createdAt: string;

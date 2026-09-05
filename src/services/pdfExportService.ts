@@ -9,13 +9,15 @@ interface GeneratePDFOptions {
   startDate?: string;
   endDate?: string;
   crises: CrisisRecord[];
+  includeImages?: boolean;
 }
 
 export const generateMedicalReportPDF = ({
   patientName = 'Paciente',
   startDate,
   endDate,
-  crises
+  crises,
+  includeImages = true
 }: GeneratePDFOptions) => {
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -159,6 +161,64 @@ export const generateMedicalReportPDF = ({
     },
     margin: { left: 14, right: 14 }
   });
+
+  // 5. Visual Attachments (if requested and present)
+  if (includeImages) {
+    const crisesWithImages = crises.filter(c => c.images && c.images.length > 0);
+    if (crisesWithImages.length > 0) {
+      doc.addPage();
+      let pageY = 20;
+
+      doc.setFillColor(...primaryColor);
+      doc.rect(0, 0, pageWidth, 18, 'F');
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(12);
+      doc.setFont('helvetica', 'bold');
+      doc.text('ANEXOS E REGISTROS VISUAIS', 14, 12);
+
+      pageY = 28;
+
+      crisesWithImages.forEach(c => {
+        const typeLabel = c.type ? (typeMap[c.type] || c.type) : 'Episódio';
+        const dateHeader = `${formatDateShort(c.date)} — ${typeLabel}${c.intensity !== null ? ` (Dor: ${c.intensity}/10)` : ''}`;
+
+        // Quebra de página se não couber a linha da foto
+        if (pageY > 220) {
+          doc.addPage();
+          pageY = 20;
+        }
+
+        doc.setTextColor(...darkTextColor);
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'bold');
+        doc.text(dateHeader, 14, pageY);
+
+        if (c.notes) {
+          doc.setFont('helvetica', 'italic');
+          doc.setFontSize(8);
+          doc.setTextColor(...lightTextColor);
+          doc.text(`Obs: ${c.notes.slice(0, 100)}`, 14, pageY + 4);
+        }
+
+        pageY += c.notes ? 8 : 4;
+
+        const imgSize = 48; // mm
+        let imgX = 14;
+
+        c.images?.forEach((imgBase64, imgIdx) => {
+          try {
+            const format = imgBase64.includes('image/png') ? 'PNG' : 'JPEG';
+            doc.addImage(imgBase64, format, imgX, pageY, imgSize, imgSize);
+            imgX += imgSize + 6;
+          } catch (e) {
+            console.warn(`Erro ao inserir imagem ${imgIdx + 1} no PDF:`, e);
+          }
+        });
+
+        pageY += imgSize + 10;
+      });
+    }
+  }
 
   const filename = `relatorio-enxaqueca-${new Date().toISOString().split('T')[0]}.pdf`;
   doc.save(filename);

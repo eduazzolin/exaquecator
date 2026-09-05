@@ -9,7 +9,8 @@ import {
   FileCode, 
   X, 
   Download, 
-  Calendar
+  Calendar,
+  Camera
 } from 'lucide-react';
 import { subMonths, format, parseISO } from 'date-fns';
 
@@ -27,6 +28,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   const { user } = useAuth();
   const [patientName, setPatientName] = useState(user?.displayName || 'Eduardo');
   const [dateRangeOption, setDateRangeOption] = useState<'all' | '30days' | '90days' | 'year'>('all');
+  const [includeImages, setIncludeImages] = useState(true);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
 
   if (!isOpen) return null;
@@ -52,6 +54,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   };
 
   const filtered = getFilteredCrises();
+  const totalImagesCount = filtered.reduce((acc, c) => acc + (c.images?.length || 0), 0);
 
   const handleExportPDF = () => {
     setIsExportingPDF(true);
@@ -60,7 +63,8 @@ export const ExportModal: React.FC<ExportModalProps> = ({
         patientName: patientName.trim() || 'Paciente',
         startDate: dateRangeOption !== 'all' ? format(subMonths(new Date(), dateRangeOption === '30days' ? 1 : dateRangeOption === '90days' ? 3 : 12), 'dd/MM/yyyy') : undefined,
         endDate: format(new Date(), 'dd/MM/yyyy'),
-        crises: filtered
+        crises: filtered,
+        includeImages: includeImages && totalImagesCount > 0
       });
     } catch (err) {
       console.error('Error generating PDF:', err);
@@ -148,22 +152,48 @@ export const ExportModal: React.FC<ExportModalProps> = ({
           <div className="space-y-2.5">
             
             {/* Option 1: PDF Medical Report */}
-            <div className="p-3.5 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <FileText className="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0" />
-                <div>
-                  <h4 className="font-semibold text-xs sm:text-sm text-[var(--text-primary)]">Relatório Médico (PDF)</h4>
-                  <p className="text-[11px] text-[var(--text-muted)]">Pronto para consultas e laudos médicos</p>
+            <div className="p-3.5 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)] space-y-2.5">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-[var(--text-secondary)] flex-shrink-0" />
+                  <div>
+                    <h4 className="font-semibold text-xs sm:text-sm text-[var(--text-primary)]">Relatório Médico (PDF)</h4>
+                    <p className="text-[11px] text-[var(--text-muted)]">Pronto para consultas e laudos médicos</p>
+                  </div>
                 </div>
+
+                <button
+                  onClick={handleExportPDF}
+                  disabled={isExportingPDF || filtered.length === 0}
+                  className="btn btn-primary text-xs py-1.5 px-3 disabled:opacity-40"
+                >
+                  {isExportingPDF ? 'Gerando...' : 'Baixar PDF'}
+                </button>
               </div>
 
-              <button
-                onClick={handleExportPDF}
-                disabled={isExportingPDF || filtered.length === 0}
-                className="btn btn-primary text-xs py-1.5 px-3 disabled:opacity-40"
-              >
-                {isExportingPDF ? 'Gerando...' : 'Baixar PDF'}
-              </button>
+              {/* Pergunta de Inclusão de Imagens */}
+              <div className="pt-2 border-t border-[var(--card-border)]">
+                <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors">
+                  <input
+                    type="checkbox"
+                    checked={includeImages}
+                    onChange={e => setIncludeImages(e.target.checked)}
+                    disabled={totalImagesCount === 0}
+                    className="rounded border-[var(--card-border)] text-violet-600 focus:ring-violet-500 w-4 h-4 cursor-pointer"
+                  />
+                  <div className="flex items-center gap-1.5">
+                    <Camera className="w-3.5 h-3.5 text-[var(--text-muted)]" />
+                    <span>Incluir fotos anexadas no relatório</span>
+                    {totalImagesCount > 0 ? (
+                      <span className="text-[10px] font-semibold text-violet-600 dark:text-violet-400 bg-violet-500/10 px-1.5 py-0.2 rounded border border-violet-500/20">
+                        {totalImagesCount} foto{totalImagesCount > 1 ? 's' : ''}
+                      </span>
+                    ) : (
+                      <span className="text-[10px] text-[var(--text-muted)]">(nenhuma foto no período)</span>
+                    )}
+                  </div>
+                </label>
+              </div>
             </div>
 
             {/* Option 2: CSV */}

@@ -11,9 +11,11 @@ import {
   AlertTriangle, 
   FileText, 
   Edit3, 
-  Trash2 
+  Trash2,
+  Camera
 } from 'lucide-react';
 import { useData } from '../../context/DataContext';
+import { ImageLightboxModal } from '../common/ImageLightboxModal';
 
 interface RecentEpisodesFeedProps {
   crises: CrisisRecord[];
@@ -26,6 +28,7 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
 }) => {
   const { deleteCrisis } = useData();
   const [expandedCrisisId, setExpandedCrisisId] = useState<string | null>(null);
+  const [lightboxData, setLightboxData] = useState<{ images: string[]; index: number; title: string } | null>(null);
 
   // Sort descending by date
   const sortedCrises = [...crises]
@@ -107,6 +110,16 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
 
                     {crisis.type !== 'milagre' && (
                       <IntensityBadge level={crisis.intensity} size="sm" />
+                    )}
+
+                    {crisis.images && crisis.images.length > 0 && (
+                      <span
+                        className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] font-medium flex items-center gap-1"
+                        title={`${crisis.images.length} foto(s) anexada(s)`}
+                      >
+                        <Camera className="w-3 h-3 text-[var(--text-muted)]" />
+                        <span>{crisis.images.length}</span>
+                      </span>
                     )}
 
                     {crisis.medicationsTaken && crisis.medicationsTaken.length > 0 && (
@@ -214,6 +227,35 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
                     </div>
                   )}
 
+                  {/* Attached Photos */}
+                  {crisis.images && crisis.images.length > 0 && (
+                    <div className="space-y-1.5 p-2.5 rounded-md bg-[var(--card-bg)] border border-[var(--card-border)]">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] flex items-center gap-1.5">
+                        <Camera className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                        <span>Fotos Anexadas ({crisis.images.length})</span>
+                      </p>
+                      <div className="flex items-center gap-2 overflow-x-auto py-1">
+                        {crisis.images.map((img, idx) => (
+                          <img
+                            key={idx}
+                            src={img}
+                            alt={`Foto ${idx + 1}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setLightboxData({
+                                images: crisis.images || [],
+                                index: idx,
+                                title: formatDateFull(crisis.date)
+                              });
+                            }}
+                            className="w-14 h-14 rounded-lg object-cover cursor-pointer border border-[var(--card-border)] hover:scale-105 transition-transform shrink-0"
+                            title="Clique para ampliar"
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {/* Actions inside details */}
                   <div className="flex items-center justify-end gap-2 pt-1 border-t border-[var(--card-border)]">
                     {onEditEpisode && (
@@ -245,6 +287,15 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
           );
         })}
       </div>
+
+      {/* Modal de Zoom da Imagem (Lightbox) */}
+      <ImageLightboxModal
+        isOpen={lightboxData !== null}
+        onClose={() => setLightboxData(null)}
+        images={lightboxData?.images || []}
+        initialIndex={lightboxData?.index ?? 0}
+        title={lightboxData?.title}
+      />
     </div>
   );
 };

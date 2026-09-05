@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
 import { MedicationTaken, ReliefLevel, CrisisType } from '../../types';
 import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor, PERIOD_OPTIONS } from '../../utils/constants';
 import { formatDateFull } from '../../utils/dateUtils';
+import { compressImage } from '../../utils/imageUtils';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
-import { Plus, Minus, Pill, Save, Check, X, Trash2, CheckCircle2, ChevronDown, ChevronUp, Sparkles, Pencil } from 'lucide-react';
+import { ImageLightboxModal } from '../common/ImageLightboxModal';
+import { Plus, Minus, Pill, Save, Check, X, Trash2, CheckCircle2, ChevronDown, ChevronUp, Sparkles, Pencil, Camera } from 'lucide-react';
 
 interface CrisisFormProps {
   selectedDate: string;
@@ -27,9 +29,15 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [triggers, setTriggers] = useState<string[]>([]);
   const [medicationsTaken, setMedicationsTaken] = useState<MedicationTaken[]>([]);
+  const [images, setImages] = useState<string[]>([]);
   const [notes, setNotes] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+
+  // Image upload and preview states
+  const [isCompressingImage, setIsCompressingImage] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Custom med input state
   const [isAddingCustomMed, setIsAddingCustomMed] = useState(false);
@@ -45,6 +53,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
       setSymptoms(existingCrisis.symptoms || []);
       setTriggers(existingCrisis.triggers || []);
       setMedicationsTaken(existingCrisis.medicationsTaken || []);
+      setImages(existingCrisis.images || []);
       setNotes(existingCrisis.notes || '');
       if ((existingCrisis.triggers && existingCrisis.triggers.length > 0) || (existingCrisis.symptoms && existingCrisis.symptoms.length > 0) || existingCrisis.intensity !== null) {
         setShowAdvanced(true);
@@ -56,10 +65,46 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
       setSymptoms([]);
       setTriggers([]);
       setMedicationsTaken([]);
+      setImages([]);
       setNotes('');
       setShowAdvanced(false);
     }
   }, [selectedDate, existingCrisis]);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const availableSlots = 3 - images.length;
+    if (availableSlots <= 0) {
+      alert('Você já atingiu o limite de 3 fotos para este registro.');
+      return;
+    }
+
+    const filesToProcess = Array.from(files).slice(0, availableSlots);
+    setIsCompressingImage(true);
+
+    try {
+      const compressedList: string[] = [];
+      for (const file of filesToProcess) {
+        const b64 = await compressImage(file);
+        compressedList.push(b64);
+      }
+      setImages(prev => [...prev, ...compressedList].slice(0, 3));
+    } catch (err) {
+      console.error('Erro ao processar imagem:', err);
+      alert('Não foi possível processar a imagem selecionada.');
+    } finally {
+      setIsCompressingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
 
   const handleTypeClick = (selectedType: CrisisType) => {
     setType(type === selectedType ? null : selectedType);
@@ -138,6 +183,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         symptoms: isMilagre ? [] : symptoms,
         triggers,
         medicationsTaken: isMilagre ? [] : medicationsTaken,
+        images: images.slice(0, 3),
         notes: notes.trim()
       };
 
@@ -514,7 +560,93 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           />
         </div>
 
-        {/* 6. SEÇÃO RETRÁTIL: INTENSIDADE, SINTOMAS E GATILHOS (Apenas para presenca, dor e aura) */}
+        {/* 6. FOTOS & ANEXOS */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase flex items-center gap-1.5">
+              <Camera className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+              <span>Fotos & Anexos</span>
+              <span className="text-[10px] text-[var(--text-muted)] font-normal">
+                ({images.length}/3)
+              </span>
+            </label>
+
+            {images.length < 3 && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isCompressingImage}
+                className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 cursor-pointer"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>{isCompressingImage ? 'Otimizando...' : 'Adicionar Foto'}</span>
+              </button>
+            )}
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
+          {images.length > 0 ? (
+            <div className="flex items-center gap-2.5 overflow-x-auto py-1">
+              {images.map((img, idx) => (
+                <div
+                  key={idx}
+                  className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[var(--card-border)] bg-[var(--bg-secondary)] shadow-sm shrink-0"
+                >
+                  <img
+                    src={img}
+                    alt={`Anexo ${idx + 1}`}
+                    onClick={() => setLightboxIndex(idx)}
+                    className="w-full h-full object-cover cursor-pointer transition-transform group-hover:scale-105"
+                    title="Clique para ver em tela cheia"
+                  />
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleRemoveImage(idx);
+                    }}
+                    className="absolute top-1 right-1 p-1 rounded-full bg-black/70 hover:bg-rose-600 text-white transition-colors"
+                    title="Remover foto"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+
+              {images.length < 3 && (
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isCompressingImage}
+                  className="w-20 h-20 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex flex-col items-center justify-center gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all shrink-0 bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-secondary)] cursor-pointer"
+                >
+                  <Camera className="w-5 h-5" />
+                  <span className="text-[10px] font-medium">+ Foto</span>
+                </button>
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={isCompressingImage}
+              className="w-full py-2.5 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] cursor-pointer"
+            >
+              <Camera className="w-4 h-4 text-[var(--text-secondary)]" />
+              <span>{isCompressingImage ? 'Otimizando foto...' : 'Anexar foto (refeição, receita, exame ou ambiente)'}</span>
+            </button>
+          )}
+        </div>
+
+        {/* 7. SEÇÃO RETRÁTIL: INTENSIDADE, SINTOMAS E GATILHOS (Apenas para presenca, dor e aura) */}
         {type !== 'milagre' && (
         <div className="border border-[var(--card-border)] rounded-xl bg-[var(--bg-secondary)]/40 overflow-hidden transition-all">
           <button
@@ -650,6 +782,15 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         </div>
 
       </form>
+
+      {/* Modal de Zoom da Imagem (Lightbox) */}
+      <ImageLightboxModal
+        isOpen={lightboxIndex !== null}
+        onClose={() => setLightboxIndex(null)}
+        images={images}
+        initialIndex={lightboxIndex ?? 0}
+        title={formatDateFull(selectedDate)}
+      />
 
     </div>
   );
