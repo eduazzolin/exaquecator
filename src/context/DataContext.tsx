@@ -36,10 +36,10 @@ interface DataContextType {
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [crises, setCrises] = useState<CrisisRecord[]>([]);
   const [medications, setMedications] = useState<Medication[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [dataLoading, setDataLoading] = useState<boolean>(true);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const showToast = (message: string, type: AppNotification['type'] = 'success') => {
@@ -55,7 +55,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refreshData = async () => {
-    setLoading(true);
+    setDataLoading(true);
     try {
       const [fetchedCrises, fetchedMeds] = await Promise.all([
         fetchCrisesFromStorage(user?.uid),
@@ -67,13 +67,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error loading data:', error);
       showToast('Erro ao carregar dados', 'error');
     } finally {
-      setLoading(false);
+      setDataLoading(false);
     }
   };
 
   useEffect(() => {
+    if (authLoading) return;
     refreshData();
-  }, [user?.uid]);
+  }, [user?.uid, authLoading]);
 
   // --- Crisis Handlers ---
 
@@ -147,12 +148,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     await updateMedication(updated);
   };
 
+  const isLoading = authLoading || dataLoading;
+
   return (
     <DataContext.Provider
       value={{
         crises,
         medications,
-        loading,
+        loading: isLoading,
         notifications,
         dismissNotification,
         showToast,

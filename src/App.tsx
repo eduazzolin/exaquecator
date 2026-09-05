@@ -10,11 +10,12 @@ import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 import { MedicationManager } from './components/medications/MedicationManager';
 import { ExportModal } from './components/export/ExportModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { TimelineSkeleton, AnalyticsSkeleton, MedicationSkeleton } from './components/common/Skeleton';
 import { getTodayDateString } from './utils/dateUtils';
 import { APP_VERSION } from './utils/constants';
 
 export const App: React.FC = () => {
-  const { crises } = useData();
+  const { crises, loading } = useData();
 
   const [activeTab, setActiveTab] = useState<'timeline' | 'analytics' | 'medications'>('timeline');
   const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
@@ -77,48 +78,60 @@ export const App: React.FC = () => {
         
         {/* VIEW 1: DIÁRIO (REGISTRO DIRETO E LIMPO NA TELA + CALENDÁRIO COM CORES + HISTÓRICO) */}
         {activeTab === 'timeline' && (
-          <div className="space-y-6 animate-in">
-            
-            {/* 1. Formulário Direto, Limpo e Prático */}
-            <CrisisForm
-              selectedDate={selectedDate}
-              onDateChange={setSelectedDate}
-            />
+          loading ? (
+            <TimelineSkeleton />
+          ) : (
+            <div className="space-y-6 animate-in">
+              
+              {/* 1. Formulário Direto, Limpo e Prático */}
+              <CrisisForm
+                selectedDate={selectedDate}
+                onDateChange={setSelectedDate}
+              />
 
-            {/* 2. Calendário Interativo com Cores por Tipo de Crise e Micro-KPIs */}
-            <CalendarView
-              crises={crises}
-              selectedDate={selectedDate}
-              selectedCalendarDay={selectedCalendarDay}
-              onSelectCalendarDay={setSelectedCalendarDay}
-              onSelectDate={setSelectedDate}
-              onEditInForm={handleSelectDateForEdit}
-            />
+              {/* 2. Calendário Interativo com Cores por Tipo de Crise e Micro-KPIs */}
+              <CalendarView
+                crises={crises}
+                selectedDate={selectedDate}
+                selectedCalendarDay={selectedCalendarDay}
+                onSelectCalendarDay={setSelectedCalendarDay}
+                onSelectDate={setSelectedDate}
+                onEditInForm={handleSelectDateForEdit}
+              />
 
-            {/* 3. Feed dos Últimos Episódios */}
-            <RecentEpisodesFeed
-              crises={crises}
-              onEditEpisode={handleSelectDateForEdit}
-            />
+              {/* 3. Feed dos Últimos Episódios */}
+              <RecentEpisodesFeed
+                crises={crises}
+                onEditEpisode={handleSelectDateForEdit}
+              />
 
-          </div>
+            </div>
+          )
         )}
 
         {/* VIEW 2: ESTATÍSTICAS */}
         {activeTab === 'analytics' && (
-          <div className="animate-in">
-            <AnalyticsDashboard
-              crises={crises}
-              theme={theme}
-            />
-          </div>
+          loading ? (
+            <AnalyticsSkeleton />
+          ) : (
+            <div className="animate-in">
+              <AnalyticsDashboard
+                crises={crises}
+                theme={theme}
+              />
+            </div>
+          )
         )}
 
         {/* VIEW 3: MEDICAMENTOS */}
         {activeTab === 'medications' && (
-          <div className="animate-in">
-            <MedicationManager />
-          </div>
+          loading ? (
+            <MedicationSkeleton />
+          ) : (
+            <div className="animate-in">
+              <MedicationManager />
+            </div>
+          )
         )}
 
       </main>
