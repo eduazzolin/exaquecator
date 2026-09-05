@@ -118,7 +118,12 @@ export const generateMedicalReportPDF = ({
       return `${qtyText}${m.name} ${m.dosage || ''}${reliefText}`;
     }).join('\n') || '-';
 
+    const locationLabel = c.painLocation
+      ? `Local: ${c.painLocation === 'esquerda' ? 'Esquerda' : c.painLocation === 'direita' ? 'Direita' : 'Mista'}`
+      : '';
+
     const info = [
+      locationLabel,
       c.symptoms?.length ? `Sintomas: ${c.symptoms.join(', ')}` : '',
       c.triggers?.length ? `Gatilhos: ${c.triggers.join(', ')}` : '',
       c.notes ? `Obs: ${c.notes}` : ''
@@ -180,7 +185,8 @@ export const generateMedicalReportPDF = ({
 
       crisesWithImages.forEach(c => {
         const typeLabel = c.type ? (typeMap[c.type] || c.type) : 'Episódio';
-        const dateHeader = `${formatDateShort(c.date)} — ${typeLabel}${c.intensity !== null ? ` (Dor: ${c.intensity}/10)` : ''}`;
+        const locText = c.painLocation ? ` [${c.painLocation}]` : '';
+        const dateHeader = `${formatDateShort(c.date)} — ${typeLabel}${c.intensity !== null ? ` (Dor: ${c.intensity}/10${locText})` : locText}`;
 
         // Quebra de página se não couber a linha da foto
         if (pageY > 220) {

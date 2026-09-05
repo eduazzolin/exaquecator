@@ -157,6 +157,12 @@ export const DailyCheckInHero: React.FC<DailyCheckInHeroProps> = ({
                   {formatPeriod(selectedRecord.startTime)}
                 </span>
               )}
+
+              {selectedRecord.painLocation && (
+                <span className="badge bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-medium">
+                  {selectedRecord.painLocation === 'esquerda' ? '⬅️ Esquerda' : selectedRecord.painLocation === 'direita' ? '➡️ Direita' : '↔️ Mista'}
+                </span>
+              )}
             </div>
 
             <span className="text-[11px] text-[var(--text-muted)]">

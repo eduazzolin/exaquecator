@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
-import { MedicationTaken, ReliefLevel, CrisisType } from '../../types';
+import { MedicationTaken, ReliefLevel, CrisisType, PainLocation } from '../../types';
 import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor, PERIOD_OPTIONS } from '../../utils/constants';
 import { formatDateFull } from '../../utils/dateUtils';
 import { compressImage } from '../../utils/imageUtils';
@@ -26,6 +26,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   const [startTime, setStartTime] = useState<string>('');
   const [type, setType] = useState<CrisisType | null>('presenca');
   const [intensity, setIntensity] = useState<number | null>(null);
+  const [painLocation, setPainLocation] = useState<PainLocation | null>(null);
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [triggers, setTriggers] = useState<string[]>([]);
   const [medicationsTaken, setMedicationsTaken] = useState<MedicationTaken[]>([]);
@@ -50,18 +51,25 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
       setStartTime(existingCrisis.startTime || '');
       setType(existingCrisis.type ?? 'presenca');
       setIntensity(existingCrisis.intensity ?? null);
+      setPainLocation(existingCrisis.painLocation ?? null);
       setSymptoms(existingCrisis.symptoms || []);
       setTriggers(existingCrisis.triggers || []);
       setMedicationsTaken(existingCrisis.medicationsTaken || []);
       setImages(existingCrisis.images || []);
       setNotes(existingCrisis.notes || '');
-      if ((existingCrisis.triggers && existingCrisis.triggers.length > 0) || (existingCrisis.symptoms && existingCrisis.symptoms.length > 0) || existingCrisis.intensity !== null) {
+      if (
+        (existingCrisis.triggers && existingCrisis.triggers.length > 0) ||
+        (existingCrisis.symptoms && existingCrisis.symptoms.length > 0) ||
+        existingCrisis.intensity !== null ||
+        existingCrisis.painLocation
+      ) {
         setShowAdvanced(true);
       }
     } else {
       setStartTime('');
       setType('presenca');
       setIntensity(null);
+      setPainLocation(null);
       setSymptoms([]);
       setTriggers([]);
       setMedicationsTaken([]);
@@ -180,6 +188,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         startTime: startTime.trim() || undefined,
         type,
         intensity: isMilagre ? null : intensity,
+        painLocation: isMilagre ? null : (painLocation || null),
         symptoms: isMilagre ? [] : symptoms,
         triggers,
         medicationsTaken: isMilagre ? [] : medicationsTaken,
@@ -571,7 +580,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
               <div className="flex items-center gap-2 flex-wrap">
                 <Sparkles className="w-4 h-4 text-[var(--text-secondary)]" />
                 <span className="text-xs font-semibold text-[var(--text-primary)]">
-                  Intensidade, Sintomas, Gatilhos e Fotos
+                  Intensidade, Local, Sintomas, Gatilhos e Fotos
                 </span>
                 <span className="text-[10px] text-[var(--text-muted)] font-normal hidden sm:inline">
                   • Opcional
@@ -579,6 +588,11 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                 {intensity !== null && (
                   <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30">
                     Dor {intensity}/10
+                  </span>
+                )}
+                {painLocation && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-500/30">
+                    {painLocation === 'esquerda' ? '⬅️ Esquerda' : painLocation === 'direita' ? '➡️ Direita' : '↔️ Mista'}
                   </span>
                 )}
                 {symptoms.length > 0 && (
@@ -637,6 +651,47 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                           }`}
                         >
                           {num}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Local da Dor */}
+                <div className="space-y-2 p-3 sm:p-3.5 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)]">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
+                      Local da Dor
+                    </label>
+                    {painLocation ? (
+                      <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full border bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30">
+                        {painLocation === 'mista' ? 'Mista (Bilateral)' : painLocation === 'esquerda' ? 'Lado Esquerdo' : 'Lado Direito'}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[var(--text-muted)]">Não informado</span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { id: 'esquerda' as PainLocation, label: 'Esquerda', icon: '⬅️' },
+                      { id: 'direita' as PainLocation, label: 'Direita', icon: '➡️' },
+                      { id: 'mista' as PainLocation, label: 'Mista', icon: '↔️' }
+                    ].map(opt => {
+                      const isSelected = painLocation === opt.id;
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => setPainLocation(isSelected ? null : opt.id)}
+                          className={`h-9 sm:h-10 rounded-xl text-xs font-semibold transition-all flex items-center justify-center gap-1.5 ${
+                            isSelected
+                              ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-sm scale-[1.02]'
+                              : 'bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
+                          }`}
+                        >
+                          <span>{opt.icon}</span>
+                          <span>{opt.label}</span>
                         </button>
                       );
                     })}

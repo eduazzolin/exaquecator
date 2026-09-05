@@ -23,6 +23,8 @@ export interface MedicationTaken {
 
 export type CrisisType = 'presenca' | 'dor' | 'aura' | 'milagre';
 
+export type PainLocation = 'esquerda' | 'direita' | 'mista';
+
 export type TimePeriod = 'manha' | 'tarde' | 'noite';
 
 export interface CrisisRecord {
@@ -32,6 +34,7 @@ export interface CrisisRecord {
   startTime?: TimePeriod | string; // 'manha' | 'tarde' | 'noite' (ou legado HH:mm)
   type?: CrisisType | null; // 'presenca' | 'dor' | 'aura' | 'milagre'
   intensity: number | null; // 1 a 10 ou null se não informada
+  painLocation?: PainLocation | null; // 'esquerda' | 'direita' | 'mista'
   symptoms?: string[];
   triggers?: string[];
   medicationsTaken?: MedicationTaken[];

@@ -112,6 +112,15 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
                       <IntensityBadge level={crisis.intensity} size="sm" />
                     )}
 
+                    {crisis.type !== 'milagre' && crisis.painLocation && (
+                      <span
+                        className="text-[11px] px-1.5 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300 font-medium flex items-center gap-1"
+                        title={`Local da dor: ${crisis.painLocation}`}
+                      >
+                        {crisis.painLocation === 'esquerda' ? '⬅️ Esquerda' : crisis.painLocation === 'direita' ? '➡️ Direita' : '↔️ Mista'}
+                      </span>
+                    )}
+
                     {crisis.images && crisis.images.length > 0 && (
                       <span
                         className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] font-medium flex items-center gap-1"

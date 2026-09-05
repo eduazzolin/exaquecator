@@ -479,6 +479,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 {activeCrisis.type !== 'milagre' && (
                   <IntensityBadge level={activeCrisis.intensity} showLabel />
                 )}
+
+                {activeCrisis.type !== 'milagre' && activeCrisis.painLocation && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 border border-indigo-500/20 text-indigo-700 dark:text-indigo-300">
+                    {activeCrisis.painLocation === 'esquerda' ? '⬅️ Esquerda' : activeCrisis.painLocation === 'direita' ? '➡️ Direita' : '↔️ Mista'}
+                  </span>
+                )}
               </div>
 
               {/* Medications Taken */}
