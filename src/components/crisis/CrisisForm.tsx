@@ -7,7 +7,7 @@ import { compressImage } from '../../utils/imageUtils';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
 import { ImageLightboxModal } from '../common/ImageLightboxModal';
-import { Plus, Minus, Pill, Save, Check, X, Trash2, CheckCircle2, ChevronDown, ChevronUp, Sparkles, Pencil, Camera } from 'lucide-react';
+import { Plus, Minus, Pill, Save, Check, X, Trash2, CheckCircle2, ChevronDown, ChevronUp, Sparkles, Pencil, Camera, Image as ImageIcon } from 'lucide-react';
 
 interface CrisisFormProps {
   selectedDate: string;
@@ -38,7 +38,8 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   // Image upload and preview states
   const [isCompressingImage, setIsCompressingImage] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   // Custom med input state
   const [isAddingCustomMed, setIsAddingCustomMed] = useState(false);
@@ -104,8 +105,11 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
       alert('Não foi possível processar a imagem selecionada.');
     } finally {
       setIsCompressingImage(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+      if (cameraInputRef.current) {
+        cameraInputRef.current.value = '';
+      }
+      if (galleryInputRef.current) {
+        galleryInputRef.current.value = '';
       }
     }
   };
@@ -229,11 +233,126 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
     }
   };
 
+  const renderPhotoAttachment = (isStandalone: boolean = false) => (
+    <div className={`space-y-3 ${isStandalone ? '' : 'pt-3 border-t border-[var(--card-border)]'}`}>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase flex items-center gap-1.5">
+          <Camera className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+          <span>Fotos & Anexos</span>
+          <span className="text-[10px] text-[var(--text-muted)] font-normal">
+            ({images.length}/3)
+          </span>
+        </label>
+
+        {images.length < 3 && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => cameraInputRef.current?.click()}
+              disabled={isCompressingImage}
+              className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] cursor-pointer"
+              title="Abrir câmera para tirar foto no Android/iOS"
+            >
+              <Camera className="w-3.5 h-3.5 text-sky-500" />
+              <span>Tirar Foto</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => galleryInputRef.current?.click()}
+              disabled={isCompressingImage}
+              className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 px-2.5 py-1 rounded-lg hover:bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] cursor-pointer"
+              title="Escolher foto existente da galeria"
+            >
+              <ImageIcon className="w-3.5 h-3.5 text-violet-500" />
+              <span>Galeria</span>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {images.length > 0 ? (
+        <div className="flex items-center gap-3 overflow-x-auto py-1.5">
+          {images.map((img, idx) => (
+            <div
+              key={idx}
+              className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[var(--card-border)] bg-[var(--card-bg)] shadow-sm shrink-0"
+            >
+              <img
+                src={img}
+                alt={`Anexo ${idx + 1}`}
+                onClick={() => setLightboxIndex(idx)}
+                className="w-full h-full object-cover cursor-pointer transition-transform group-hover:scale-105"
+                title="Clique para ver em tela cheia"
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleRemoveImage(idx);
+                }}
+                className="absolute top-1 right-1 p-1 rounded-full bg-black/70 hover:bg-rose-600 text-white transition-colors"
+                title="Remover foto"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+
+          {images.length < 3 && (
+            <div className="flex flex-col gap-1.5 shrink-0 justify-center">
+              <button
+                type="button"
+                onClick={() => cameraInputRef.current?.click()}
+                disabled={isCompressingImage}
+                className="h-9 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
+                title="Tirar foto com a câmera"
+              >
+                <Camera className="w-3.5 h-3.5 text-sky-500" />
+                <span>+ Câmera</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => galleryInputRef.current?.click()}
+                disabled={isCompressingImage}
+                className="h-9 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center gap-1.5 text-xs font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
+                title="Escolher da galeria"
+              >
+                <ImageIcon className="w-3.5 h-3.5 text-violet-500" />
+                <span>+ Galeria</span>
+              </button>
+            </div>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+          <button
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            disabled={isCompressingImage}
+            className="py-3 px-3.5 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
+          >
+            <Camera className="w-4 h-4 text-sky-500" />
+            <span className="font-semibold">{isCompressingImage ? 'Processando foto...' : 'Tirar Foto Agora'}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            disabled={isCompressingImage}
+            className="py-3 px-3.5 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
+          >
+            <ImageIcon className="w-4 h-4 text-violet-500" />
+            <span className="font-semibold">{isCompressingImage ? 'Processando foto...' : 'Escolher da Galeria'}</span>
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
   const currentColor = intensity !== null ? getIntensityColor(intensity) : null;
 
   return (
     <div
-      className={`p-4 sm:p-6 space-y-5 rounded-2xl shadow-sm transition-all duration-200 border ${
+      className={`p-5 sm:p-7 space-y-6 sm:space-y-7 rounded-2xl shadow-sm transition-all duration-200 border ${
         existingCrisis
           ? 'bg-amber-500/[0.04] dark:bg-amber-500/[0.07] border-amber-500/40 ring-1 ring-amber-500/25 shadow-md shadow-amber-500/5'
           : 'glass border-[var(--card-border)]'
@@ -241,7 +360,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
     >
       {/* Banner Exclusivo do Modo de Edição */}
       {existingCrisis && (
-        <div className="flex items-center justify-between px-3.5 py-2 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-medium animate-in">
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-medium animate-in">
           <div className="flex items-center gap-2">
             <Pencil className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
             <span><strong>Modo de Edição:</strong> Você está alterando o registro existente deste dia.</span>
@@ -253,7 +372,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
       )}
       
       {/* 1. Barra Superior: Data, Período e Status */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[var(--card-border)]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 pb-5 sm:pb-6 border-b border-[var(--card-border)]">
         <div className="flex flex-wrap items-center gap-3">
           {/* Seletor de Data */}
           <div>
@@ -287,12 +406,8 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         </div>
 
         {/* Status / Ação Rápida */}
-        <div className="flex items-center gap-2 self-start sm:self-center">
-          {existingCrisis ? (
-            <span className="badge bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 text-xs px-2.5 py-1">
-              <Pencil className="w-3.5 h-3.5" /> Registro Existente
-            </span>
-          ) : (
+        {!existingCrisis && (
+          <div className="flex items-center gap-2 self-start sm:self-center">
             <button
               type="button"
               onClick={handleMarkPainFree}
@@ -300,15 +415,15 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             >
               <CheckCircle2 className="w-3.5 h-3.5" /> Dia Livre de Dor
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* Formulário Principal Direto na Tela */}
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7">
         
         {/* 2. TIPO DO EPISÓDIO COM IDENTIDADE CLÍNICA */}
-        <div className="space-y-2">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
               Tipo do Episódio
@@ -556,16 +671,21 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
         )}
 
         {/* 5. DESCRIÇÃO / OBSERVAÇÕES */}
-        <div className="space-y-1.5">
-          <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
-            Descrição / Observações
-          </label>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
+              Descrição / Observações
+            </label>
+            <span className="text-[10px] text-[var(--text-muted)] font-normal hidden sm:inline">
+              Opcional • Contexto, alimentação, ambiente...
+            </span>
+          </div>
           <textarea
-            rows={2}
+            rows={4}
             value={notes}
             onChange={e => setNotes(e.target.value)}
             placeholder={type === 'milagre' ? "O que você acha que aconteceu? 'Vai entender'..." : "Notas adicionais, contexto ou observações sobre o episódio..."}
-            className="input-field text-xs resize-none rounded-xl"
+            className="input-field text-xs rounded-xl min-h-[96px] sm:min-h-[115px] resize-y leading-relaxed"
           />
         </div>
 
@@ -715,90 +835,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                 />
 
                 {/* Bloco de Fotos & Anexos dentro da seção retrátil */}
-                <div className="space-y-2 pt-2 border-t border-[var(--card-border)]">
-                  <div className="flex items-center justify-between">
-                    <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase flex items-center gap-1.5">
-                      <Camera className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-                      <span>Fotos & Anexos</span>
-                      <span className="text-[10px] text-[var(--text-muted)] font-normal">
-                        ({images.length}/3)
-                      </span>
-                    </label>
-
-                    {images.length < 3 && (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isCompressingImage}
-                        className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 cursor-pointer"
-                      >
-                        <Camera className="w-3.5 h-3.5" />
-                        <span>{isCompressingImage ? 'Otimizando...' : 'Adicionar Foto'}</span>
-                      </button>
-                    )}
-                  </div>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleFileChange}
-                    className="hidden"
-                  />
-
-                  {images.length > 0 ? (
-                    <div className="flex items-center gap-2.5 overflow-x-auto py-1">
-                      {images.map((img, idx) => (
-                        <div
-                          key={idx}
-                          className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[var(--card-border)] bg-[var(--card-bg)] shadow-sm shrink-0"
-                        >
-                          <img
-                            src={img}
-                            alt={`Anexo ${idx + 1}`}
-                            onClick={() => setLightboxIndex(idx)}
-                            className="w-full h-full object-cover cursor-pointer transition-transform group-hover:scale-105"
-                            title="Clique para ver em tela cheia"
-                          />
-                          <button
-                            type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleRemoveImage(idx);
-                            }}
-                            className="absolute top-1 right-1 p-1 rounded-full bg-black/70 hover:bg-rose-600 text-white transition-colors"
-                            title="Remover foto"
-                          >
-                            <X className="w-3 h-3" />
-                          </button>
-                        </div>
-                      ))}
-
-                      {images.length < 3 && (
-                        <button
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isCompressingImage}
-                          className="w-20 h-20 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex flex-col items-center justify-center gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all shrink-0 bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
-                        >
-                          <Camera className="w-5 h-5" />
-                          <span className="text-[10px] font-medium">+ Foto</span>
-                        </button>
-                      )}
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isCompressingImage}
-                      className="w-full py-2.5 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/30 hover:bg-[var(--card-bg)] cursor-pointer"
-                    >
-                      <Camera className="w-4 h-4 text-[var(--text-secondary)]" />
-                      <span>{isCompressingImage ? 'Otimizando foto...' : 'Anexar foto (refeição, receita, exame ou ambiente)'}</span>
-                    </button>
-                  )}
-                </div>
+                {renderPhotoAttachment(false)}
               </div>
             )}
           </div>
@@ -833,74 +870,33 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             </button>
 
             {showAdvanced && (
-              <div className="p-4 pt-3 border-t border-[var(--card-border)] space-y-3 animate-in">
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  onChange={handleFileChange}
-                  className="hidden"
-                />
-
-                {images.length > 0 ? (
-                  <div className="flex items-center gap-2.5 overflow-x-auto py-1">
-                    {images.map((img, idx) => (
-                      <div
-                        key={idx}
-                        className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[var(--card-border)] bg-[var(--card-bg)] shadow-sm shrink-0"
-                      >
-                        <img
-                          src={img}
-                          alt={`Anexo ${idx + 1}`}
-                          onClick={() => setLightboxIndex(idx)}
-                          className="w-full h-full object-cover cursor-pointer transition-transform group-hover:scale-105"
-                          title="Clique para ver em tela cheia"
-                        />
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleRemoveImage(idx);
-                          }}
-                          className="absolute top-1 right-1 p-1 rounded-full bg-black/70 hover:bg-rose-600 text-white transition-colors"
-                          title="Remover foto"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </div>
-                    ))}
-
-                    {images.length < 3 && (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        disabled={isCompressingImage}
-                        className="w-20 h-20 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex flex-col items-center justify-center gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all shrink-0 bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
-                      >
-                        <Camera className="w-5 h-5" />
-                        <span className="text-[10px] font-medium">+ Foto</span>
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isCompressingImage}
-                    className="w-full py-2.5 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/30 hover:bg-[var(--card-bg)] cursor-pointer"
-                  >
-                    <Camera className="w-4 h-4 text-[var(--text-secondary)]" />
-                    <span>{isCompressingImage ? 'Otimizando foto...' : 'Anexar foto do que você consumiu ou do ambiente'}</span>
-                  </button>
-                )}
+              <div className="p-4 sm:p-5 pt-4 border-t border-[var(--card-border)] space-y-3 animate-in">
+                {renderPhotoAttachment(true)}
               </div>
             )}
           </div>
         )}
 
+        {/* Inputs ocultos para Câmera e Galeria com compatibilidade total Android/iOS/Desktop */}
+        <input
+          ref={cameraInputRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <input
+          ref={galleryInputRef}
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+        />
+
         {/* 5. BARRA DE SALVAR */}
-        <div className="pt-3 border-t border-[var(--card-border)] flex items-center justify-between flex-wrap gap-3">
+        <div className="pt-5 sm:pt-6 border-t border-[var(--card-border)] flex items-center justify-between flex-wrap gap-3">
           <div className="text-xs text-[var(--text-muted)] flex items-center gap-1.5">
             {existingCrisis && (
               <span className="text-amber-700 dark:text-amber-300 font-medium flex items-center gap-1.5">
