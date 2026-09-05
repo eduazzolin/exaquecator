@@ -560,187 +560,288 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           />
         </div>
 
-        {/* 6. FOTOS & ANEXOS */}
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase flex items-center gap-1.5">
-              <Camera className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-              <span>Fotos & Anexos</span>
-              <span className="text-[10px] text-[var(--text-muted)] font-normal">
-                ({images.length}/3)
-              </span>
-            </label>
-
-            {images.length < 3 && (
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={isCompressingImage}
-                className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <Camera className="w-3.5 h-3.5" />
-                <span>{isCompressingImage ? 'Otimizando...' : 'Adicionar Foto'}</span>
-              </button>
-            )}
-          </div>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleFileChange}
-            className="hidden"
-          />
-
-          {images.length > 0 ? (
-            <div className="flex items-center gap-2.5 overflow-x-auto py-1">
-              {images.map((img, idx) => (
-                <div
-                  key={idx}
-                  className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[var(--card-border)] bg-[var(--bg-secondary)] shadow-sm shrink-0"
-                >
-                  <img
-                    src={img}
-                    alt={`Anexo ${idx + 1}`}
-                    onClick={() => setLightboxIndex(idx)}
-                    className="w-full h-full object-cover cursor-pointer transition-transform group-hover:scale-105"
-                    title="Clique para ver em tela cheia"
-                  />
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleRemoveImage(idx);
-                    }}
-                    className="absolute top-1 right-1 p-1 rounded-full bg-black/70 hover:bg-rose-600 text-white transition-colors"
-                    title="Remover foto"
-                  >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
-
-              {images.length < 3 && (
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={isCompressingImage}
-                  className="w-20 h-20 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex flex-col items-center justify-center gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all shrink-0 bg-[var(--bg-secondary)]/40 hover:bg-[var(--bg-secondary)] cursor-pointer"
-                >
-                  <Camera className="w-5 h-5" />
-                  <span className="text-[10px] font-medium">+ Foto</span>
-                </button>
-              )}
-            </div>
-          ) : (
+        {/* 6. SEÇÃO RETRÁTIL: DETALHAMENTOS OPCIONAIS E FOTOS */}
+        {type !== 'milagre' ? (
+          <div className="border border-[var(--card-border)] rounded-xl bg-[var(--bg-secondary)]/40 overflow-hidden transition-all">
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isCompressingImage}
-              className="w-full py-2.5 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all bg-[var(--bg-secondary)]/30 hover:bg-[var(--bg-secondary)] cursor-pointer"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-[var(--bg-secondary)] transition-colors"
             >
-              <Camera className="w-4 h-4 text-[var(--text-secondary)]" />
-              <span>{isCompressingImage ? 'Otimizando foto...' : 'Anexar foto (refeição, receita, exame ou ambiente)'}</span>
-            </button>
-          )}
-        </div>
-
-        {/* 7. SEÇÃO RETRÁTIL: INTENSIDADE, SINTOMAS E GATILHOS (Apenas para presenca, dor e aura) */}
-        {type !== 'milagre' && (
-        <div className="border border-[var(--card-border)] rounded-xl bg-[var(--bg-secondary)]/40 overflow-hidden transition-all">
-          <button
-            type="button"
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-[var(--bg-secondary)] transition-colors"
-          >
-            <div className="flex items-center gap-2 flex-wrap">
-              <Sparkles className="w-4 h-4 text-[var(--text-secondary)]" />
-              <span className="text-xs font-semibold text-[var(--text-primary)]">
-                Intensidade, Sintomas e Gatilhos
-              </span>
-              <span className="text-[10px] text-[var(--text-muted)] font-normal hidden sm:inline">
-                • Opcional
-              </span>
-              {intensity !== null && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30">
-                  Dor {intensity}/10
+              <div className="flex items-center gap-2 flex-wrap">
+                <Sparkles className="w-4 h-4 text-[var(--text-secondary)]" />
+                <span className="text-xs font-semibold text-[var(--text-primary)]">
+                  Intensidade, Sintomas, Gatilhos e Fotos
                 </span>
-              )}
-              {symptoms.length > 0 && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30">
-                  {symptoms.length} {symptoms.length === 1 ? 'sintoma' : 'sintomas'}
+                <span className="text-[10px] text-[var(--text-muted)] font-normal hidden sm:inline">
+                  • Opcional
                 </span>
-              )}
-              {triggers.length > 0 && (
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30">
-                  {triggers.length} {triggers.length === 1 ? 'gatilho' : 'gatilhos'}
-                </span>
-              )}
-            </div>
-
-            <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
-              <span>{showAdvanced ? 'Recolher' : 'Expandir'}</span>
-              {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </div>
-          </button>
-
-          {showAdvanced && (
-            <div className="p-4 pt-3 border-t border-[var(--card-border)] space-y-4 animate-in">
-              {/* Intensidade da Dor */}
-              <div className="space-y-2 p-3 sm:p-3.5 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)]">
-                <div className="flex items-center justify-between">
-                  <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
-                    Intensidade da Dor (1 a 10)
-                  </label>
-                  {intensity !== null ? (
-                    <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
-                      {intensity}/10 • {currentColor?.label}
-                    </span>
-                  ) : (
-                    <span className="text-xs text-[var(--text-muted)]">Não informada</span>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-10 gap-1 sm:gap-1.5">
-                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => {
-                    const isSelected = intensity === num;
-                    return (
-                      <button
-                        key={num}
-                        type="button"
-                        onClick={() => handleIntensityClick(num)}
-                        className={`h-9 sm:h-10 rounded-lg text-xs font-bold transition-all ${
-                          isSelected
-                            ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-md scale-105'
-                            : 'bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
-                        }`}
-                      >
-                        {num}
-                      </button>
-                    );
-                  })}
-                </div>
+                {intensity !== null && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-rose-500/15 text-rose-500 border border-rose-500/30">
+                    Dor {intensity}/10
+                  </span>
+                )}
+                {symptoms.length > 0 && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 border border-amber-500/30">
+                    {symptoms.length} {symptoms.length === 1 ? 'sintoma' : 'sintomas'}
+                  </span>
+                )}
+                {triggers.length > 0 && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30">
+                    {triggers.length} {triggers.length === 1 ? 'gatilho' : 'gatilhos'}
+                  </span>
+                )}
+                {images.length > 0 && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/30 flex items-center gap-1">
+                    <Camera className="w-3 h-3" />
+                    <span>{images.length} {images.length === 1 ? 'foto' : 'fotos'}</span>
+                  </span>
+                )}
               </div>
 
-              <TagPicker
-                label="Sintomas"
-                options={COMMON_SYMPTOMS}
-                selected={symptoms}
-                onChange={setSymptoms}
-                placeholderCustom="Outro sintoma..."
-              />
+              <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                <span>{showAdvanced ? 'Recolher' : 'Expandir'}</span>
+                {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
+            </button>
 
-              <TagPicker
-                label="Gatilhos"
-                options={COMMON_TRIGGERS}
-                selected={triggers}
-                onChange={setTriggers}
-                placeholderCustom="Outro gatilho..."
-              />
-            </div>
-          )}
-        </div>
+            {showAdvanced && (
+              <div className="p-4 pt-3 border-t border-[var(--card-border)] space-y-4 animate-in">
+                {/* Intensidade da Dor */}
+                <div className="space-y-2 p-3 sm:p-3.5 rounded-xl bg-[var(--card-bg)] border border-[var(--card-border)]">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
+                      Intensidade da Dor (1 a 10)
+                    </label>
+                    {intensity !== null ? (
+                      <span className={`text-xs font-semibold px-2.5 py-0.5 rounded-full border ${currentColor?.bg} ${currentColor?.text} ${currentColor?.border}`}>
+                        {intensity}/10 • {currentColor?.label}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-[var(--text-muted)]">Não informada</span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-10 gap-1 sm:gap-1.5">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => {
+                      const isSelected = intensity === num;
+                      return (
+                        <button
+                          key={num}
+                          type="button"
+                          onClick={() => handleIntensityClick(num)}
+                          className={`h-9 sm:h-10 rounded-lg text-xs font-bold transition-all ${
+                            isSelected
+                              ? 'bg-[var(--color-primary)] text-[var(--bg-primary)] border border-[var(--color-primary)] shadow-md scale-105'
+                              : 'bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--card-border-hover)]'
+                          }`}
+                        >
+                          {num}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                <TagPicker
+                  label="Sintomas"
+                  options={COMMON_SYMPTOMS}
+                  selected={symptoms}
+                  onChange={setSymptoms}
+                  placeholderCustom="Outro sintoma..."
+                />
+
+                <TagPicker
+                  label="Gatilhos"
+                  options={COMMON_TRIGGERS}
+                  selected={triggers}
+                  onChange={setTriggers}
+                  placeholderCustom="Outro gatilho..."
+                />
+
+                {/* Bloco de Fotos & Anexos dentro da seção retrátil */}
+                <div className="space-y-2 pt-2 border-t border-[var(--card-border)]">
+                  <div className="flex items-center justify-between">
+                    <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase flex items-center gap-1.5">
+                      <Camera className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
+                      <span>Fotos & Anexos</span>
+                      <span className="text-[10px] text-[var(--text-muted)] font-normal">
+                        ({images.length}/3)
+                      </span>
+                    </label>
+
+                    {images.length < 3 && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isCompressingImage}
+                        className="text-xs font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 cursor-pointer"
+                      >
+                        <Camera className="w-3.5 h-3.5" />
+                        <span>{isCompressingImage ? 'Otimizando...' : 'Adicionar Foto'}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={handleFileChange}
+                    className="hidden"
+                  />
+
+                  {images.length > 0 ? (
+                    <div className="flex items-center gap-2.5 overflow-x-auto py-1">
+                      {images.map((img, idx) => (
+                        <div
+                          key={idx}
+                          className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[var(--card-border)] bg-[var(--card-bg)] shadow-sm shrink-0"
+                        >
+                          <img
+                            src={img}
+                            alt={`Anexo ${idx + 1}`}
+                            onClick={() => setLightboxIndex(idx)}
+                            className="w-full h-full object-cover cursor-pointer transition-transform group-hover:scale-105"
+                            title="Clique para ver em tela cheia"
+                          />
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveImage(idx);
+                            }}
+                            className="absolute top-1 right-1 p-1 rounded-full bg-black/70 hover:bg-rose-600 text-white transition-colors"
+                            title="Remover foto"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                      ))}
+
+                      {images.length < 3 && (
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isCompressingImage}
+                          className="w-20 h-20 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex flex-col items-center justify-center gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all shrink-0 bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
+                        >
+                          <Camera className="w-5 h-5" />
+                          <span className="text-[10px] font-medium">+ Foto</span>
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isCompressingImage}
+                      className="w-full py-2.5 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/30 hover:bg-[var(--card-bg)] cursor-pointer"
+                    >
+                      <Camera className="w-4 h-4 text-[var(--text-secondary)]" />
+                      <span>{isCompressingImage ? 'Otimizando foto...' : 'Anexar foto (refeição, receita, exame ou ambiente)'}</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          /* Seção retrátil específica para Milagre (apenas fotos) */
+          <div className="border border-[var(--card-border)] rounded-xl bg-[var(--bg-secondary)]/40 overflow-hidden transition-all">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-[var(--bg-secondary)] transition-colors"
+            >
+              <div className="flex items-center gap-2 flex-wrap">
+                <Camera className="w-4 h-4 text-[var(--text-secondary)]" />
+                <span className="text-xs font-semibold text-[var(--text-primary)]">
+                  Fotos & Anexos
+                </span>
+                <span className="text-[10px] text-[var(--text-muted)] font-normal">
+                  • Opcional
+                </span>
+                {images.length > 0 && (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                    <Camera className="w-3 h-3" />
+                    <span>{images.length} {images.length === 1 ? 'foto' : 'fotos'}</span>
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center gap-1.5 text-xs text-[var(--text-secondary)]">
+                <span>{showAdvanced ? 'Recolher' : 'Expandir'}</span>
+                {showAdvanced ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              </div>
+            </button>
+
+            {showAdvanced && (
+              <div className="p-4 pt-3 border-t border-[var(--card-border)] space-y-3 animate-in">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleFileChange}
+                  className="hidden"
+                />
+
+                {images.length > 0 ? (
+                  <div className="flex items-center gap-2.5 overflow-x-auto py-1">
+                    {images.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className="relative group w-20 h-20 rounded-xl overflow-hidden border border-[var(--card-border)] bg-[var(--card-bg)] shadow-sm shrink-0"
+                      >
+                        <img
+                          src={img}
+                          alt={`Anexo ${idx + 1}`}
+                          onClick={() => setLightboxIndex(idx)}
+                          className="w-full h-full object-cover cursor-pointer transition-transform group-hover:scale-105"
+                          title="Clique para ver em tela cheia"
+                        />
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveImage(idx);
+                          }}
+                          className="absolute top-1 right-1 p-1 rounded-full bg-black/70 hover:bg-rose-600 text-white transition-colors"
+                          title="Remover foto"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+
+                    {images.length < 3 && (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isCompressingImage}
+                        className="w-20 h-20 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex flex-col items-center justify-center gap-1 text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all shrink-0 bg-[var(--card-bg)]/40 hover:bg-[var(--card-bg)] cursor-pointer"
+                      >
+                        <Camera className="w-5 h-5" />
+                        <span className="text-[10px] font-medium">+ Foto</span>
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isCompressingImage}
+                    className="w-full py-2.5 px-3 rounded-xl border border-dashed border-[var(--card-border)] hover:border-[var(--card-border-hover)] flex items-center justify-center gap-2 text-xs text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-all bg-[var(--card-bg)]/30 hover:bg-[var(--card-bg)] cursor-pointer"
+                  >
+                    <Camera className="w-4 h-4 text-[var(--text-secondary)]" />
+                    <span>{isCompressingImage ? 'Otimizando foto...' : 'Anexar foto do que você consumiu ou do ambiente'}</span>
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
         )}
 
         {/* 5. BARRA DE SALVAR */}
