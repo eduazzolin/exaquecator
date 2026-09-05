@@ -93,14 +93,21 @@ export const RecentEpisodesFeed: React.FC<RecentEpisodesFeedProps> = ({
 
                   <div className="flex flex-wrap items-center gap-1.5">
                     {crisis.type && (
-                      <span className="text-[11px] px-2 py-0.5 rounded bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-secondary)] font-medium">
+                      <span className={`text-[11px] px-2 py-0.5 rounded border font-medium ${
+                        crisis.type === 'milagre'
+                          ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-semibold'
+                          : 'bg-[var(--card-bg)] border-[var(--card-border)] text-[var(--text-secondary)]'
+                      }`}>
+                        {crisis.type === 'milagre' && '🍀 Milagre'}
                         {crisis.type === 'presenca' && '🌀 Presença'}
                         {crisis.type === 'dor' && '💥 Dor'}
                         {crisis.type === 'aura' && '✨ Aura'}
                       </span>
                     )}
 
-                    <IntensityBadge level={crisis.intensity} size="sm" />
+                    {crisis.type !== 'milagre' && (
+                      <IntensityBadge level={crisis.intensity} size="sm" />
+                    )}
 
                     {crisis.medicationsTaken && crisis.medicationsTaken.length > 0 && (
                       <span className="text-[11px] text-[var(--text-muted)] flex items-center gap-1">

@@ -99,7 +99,8 @@ export const generateMedicalReportPDF = ({
   const typeMap: Record<string, string> = {
     presenca: 'Presença',
     dor: 'Dor',
-    aura: 'Aura'
+    aura: 'Aura',
+    milagre: 'Milagre'
   };
 
   const tableData = crises.map(c => {

@@ -264,7 +264,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               let typeBadge = null;
 
               if (crisis) {
-                if (crisisType === 'presenca') {
+                if (crisisType === 'milagre') {
+                  cellBgColor = 'bg-emerald-500/20 dark:bg-emerald-500/25 border-emerald-500/40 text-emerald-900 dark:text-emerald-100 font-medium';
+                  typeBadge = '🍀';
+                } else if (crisisType === 'presenca') {
                   cellBgColor = 'bg-sky-500/20 dark:bg-sky-500/25 border-sky-500/40 text-sky-900 dark:text-sky-100 font-medium';
                   typeBadge = '🌀';
                 } else if (crisisType === 'aura') {
@@ -358,6 +361,10 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
           {/* Color Legend */}
           <div className="flex flex-wrap items-center justify-center gap-3 pt-4 mt-2 border-t border-[var(--card-border)] text-xs text-[var(--text-muted)]">
+            <div className="flex items-center gap-1.5">
+              <span className="w-3 h-3 rounded bg-emerald-500/25 border border-emerald-500/50" />
+              <span>🍀 Milagre</span>
+            </div>
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded bg-sky-500/25 border border-sky-500/50" />
               <span>🌀 Presença</span>
@@ -453,13 +460,16 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 
                 {activeCrisis.type && (
                   <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--bg-secondary)] border border-[var(--card-border)] text-[var(--text-primary)]">
+                    {activeCrisis.type === 'milagre' && '🍀 Milagre'}
                     {activeCrisis.type === 'presenca' && '🌀 Presença'}
                     {activeCrisis.type === 'dor' && '💥 Dor'}
                     {activeCrisis.type === 'aura' && '✨ Aura'}
                   </span>
                 )}
 
-                <IntensityBadge level={activeCrisis.intensity} showLabel />
+                {activeCrisis.type !== 'milagre' && (
+                  <IntensityBadge level={activeCrisis.intensity} showLabel />
+                )}
               </div>
 
               {/* Medications Taken */}

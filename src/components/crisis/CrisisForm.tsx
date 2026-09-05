@@ -129,14 +129,15 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
     setIsSubmitting(true);
 
     try {
+      const isMilagre = type === 'milagre';
       const recordData = {
         date: selectedDate,
         startTime: startTime.trim() || undefined,
         type,
-        intensity,
-        symptoms,
+        intensity: isMilagre ? null : intensity,
+        symptoms: isMilagre ? [] : symptoms,
         triggers,
-        medicationsTaken,
+        medicationsTaken: isMilagre ? [] : medicationsTaken,
         notes: notes.trim()
       };
 
@@ -260,7 +261,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             <span className="text-[11px] text-[var(--text-muted)]">Toque para selecionar</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
             {[
               {
                 id: 'presenca' as CrisisType,
@@ -288,6 +289,15 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
                 selectedClasses: 'border-violet-500/50 bg-violet-500/10 text-violet-700 dark:text-violet-300 ring-1 ring-violet-500/30',
                 badgeClasses: 'bg-violet-500 text-white dark:text-slate-900',
                 descClasses: 'text-violet-600/80 dark:text-violet-300/80'
+              },
+              {
+                id: 'milagre' as CrisisType,
+                label: 'Milagre',
+                emoji: '🍀',
+                desc: 'vai entender',
+                selectedClasses: 'border-emerald-500/50 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 ring-1 ring-emerald-500/30',
+                badgeClasses: 'bg-emerald-500 text-white dark:text-slate-900',
+                descClasses: 'text-emerald-600/80 dark:text-emerald-300/80'
               }
             ].map(opt => {
               const isSelected = type === opt.id;
@@ -324,7 +334,8 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
           </div>
         </div>
 
-        {/* 3. MEDICAMENTOS TOMADOS */}
+        {/* 3. MEDICAMENTOS TOMADOS (Oculto no tipo milagre) */}
+        {type !== 'milagre' && (
         <div className="space-y-2.5">
           <div className="flex items-center justify-between">
             <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase flex items-center gap-1.5">
@@ -464,8 +475,32 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             </div>
           )}
         </div>
+        )}
 
-        {/* 4. DESCRIÇÃO / OBSERVAÇÕES (Visível na frente do formulário) */}
+        {/* 4. GATILHOS ACIONADOS (SE TIPO FOR MILAGRE) */}
+        {type === 'milagre' && (
+          <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/25 space-y-3 animate-in">
+            <div className="flex items-center justify-between flex-wrap gap-1">
+              <label className="text-[11px] font-bold tracking-wider text-emerald-800 dark:text-emerald-300 uppercase flex items-center gap-1.5">
+                <span>🎯</span>
+                <span>Gatilhos Acionados</span>
+              </label>
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
+                Quais gatilhos você ativou mas não deram crise?
+              </span>
+            </div>
+
+            <TagPicker
+              label=""
+              options={COMMON_TRIGGERS}
+              selected={triggers}
+              onChange={setTriggers}
+              placeholderCustom="Outro gatilho acionado..."
+            />
+          </div>
+        )}
+
+        {/* 5. DESCRIÇÃO / OBSERVAÇÕES */}
         <div className="space-y-1.5">
           <label className="text-[11px] font-bold tracking-wider text-[var(--text-secondary)] uppercase">
             Descrição / Observações
@@ -474,12 +509,13 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             rows={2}
             value={notes}
             onChange={e => setNotes(e.target.value)}
-            placeholder="Notas adicionais, contexto ou observações sobre o episódio..."
+            placeholder={type === 'milagre' ? "O que você acha que aconteceu? 'Vai entender'..." : "Notas adicionais, contexto ou observações sobre o episódio..."}
             className="input-field text-xs resize-none rounded-xl"
           />
         </div>
 
-        {/* 5. SEÇÃO RETRÁTIL: INTENSIDADE, SINTOMAS E GATILHOS */}
+        {/* 6. SEÇÃO RETRÁTIL: INTENSIDADE, SINTOMAS E GATILHOS (Apenas para presenca, dor e aura) */}
+        {type !== 'milagre' && (
         <div className="border border-[var(--card-border)] rounded-xl bg-[var(--bg-secondary)]/40 overflow-hidden transition-all">
           <button
             type="button"
@@ -573,6 +609,7 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
             </div>
           )}
         </div>
+        )}
 
         {/* 5. BARRA DE SALVAR */}
         <div className="pt-3 border-t border-[var(--card-border)] flex items-center justify-between flex-wrap gap-3">

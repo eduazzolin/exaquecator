@@ -34,7 +34,7 @@ export const getTodayDateString = (): string => {
   return format(new Date(), 'yyyy-MM-dd');
 };
 
-export const getDaysSinceLastCrisis = (crises: { date: string }[]): {
+export const getDaysSinceLastCrisis = (crises: { date: string; type?: string | null }[]): {
   days: number | null;
   latestDate: string | null;
 } => {
@@ -42,7 +42,7 @@ export const getDaysSinceLastCrisis = (crises: { date: string }[]): {
   const today = startOfDay(new Date());
   const todayStr = format(today, 'yyyy-MM-dd');
   const pastOrTodayCrises = crises
-    .filter(c => c.date <= todayStr)
+    .filter(c => c.type !== 'milagre' && c.date <= todayStr)
     .sort((a, b) => b.date.localeCompare(a.date));
   const latest = pastOrTodayCrises[0];
   if (!latest) return { days: null, latestDate: null };
@@ -87,7 +87,7 @@ export const formatStreakPeriod = (period: StreakPeriod): string => {
   return `${startStr} a ${endStr}`;
 };
 
-export const calculateCrisisStreaks = (crises: { date: string }[]): CrisisStreakStats => {
+export const calculateCrisisStreaks = (crises: { date: string; type?: string | null }[]): CrisisStreakStats => {
   const emptyResult: CrisisStreakStats = {
     longestStreak: null,
     currentStreak: null,
@@ -103,12 +103,12 @@ export const calculateCrisisStreaks = (crises: { date: string }[]): CrisisStreak
   const today = startOfDay(new Date());
   const todayStr = format(today, 'yyyy-MM-dd');
 
-  // Dias com crise únicos, ordenados cronologicamente e filtrados até hoje
+  // Dias com crise reais (excluindo 'milagre'), ordenados cronologicamente e filtrados até hoje
   const pastCrisisDates = Array.from(
     new Set(
       crises
+        .filter(c => c.type !== 'milagre' && Boolean(c.date) && c.date <= todayStr)
         .map(c => c.date)
-        .filter(d => Boolean(d) && d <= todayStr)
     )
   ).sort();
 

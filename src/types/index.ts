@@ -21,7 +21,7 @@ export interface MedicationTaken {
   relief?: ReliefLevel;
 }
 
-export type CrisisType = 'presenca' | 'dor' | 'aura';
+export type CrisisType = 'presenca' | 'dor' | 'aura' | 'milagre';
 
 export type TimePeriod = 'manha' | 'tarde' | 'noite';
 
@@ -30,7 +30,7 @@ export interface CrisisRecord {
   userId?: string;
   date: string; // Formato YYYY-MM-DD
   startTime?: TimePeriod | string; // 'manha' | 'tarde' | 'noite' (ou legado HH:mm)
-  type?: CrisisType | null; // 'presenca' | 'dor' | 'aura'
+  type?: CrisisType | null; // 'presenca' | 'dor' | 'aura' | 'milagre'
   intensity: number | null; // 1 a 10 ou null se não informada
   symptoms?: string[];
   triggers?: string[];

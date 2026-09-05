@@ -232,11 +232,12 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({
               <label className="form-label">
                 Tipo do Episódio
               </label>
-              <div className="grid grid-cols-3 gap-1.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                 {[
                   { id: 'presenca' as CrisisType, label: 'Presença', emoji: '🌀' },
                   { id: 'dor' as CrisisType, label: 'Dor', emoji: '💥' },
-                  { id: 'aura' as CrisisType, label: 'Aura', emoji: '✨' }
+                  { id: 'aura' as CrisisType, label: 'Aura', emoji: '✨' },
+                  { id: 'milagre' as CrisisType, label: 'Milagre', emoji: '🍀' }
                 ].map(opt => {
                   const isSelected = type === opt.id;
                   return (

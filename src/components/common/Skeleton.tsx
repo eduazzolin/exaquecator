@@ -32,7 +32,7 @@ export const TimelineSkeleton: React.FC = () => {
         {/* Tipo de Episódio */}
         <div className="space-y-2">
           <Skeleton className="h-3 w-32 rounded" />
-          <div className="grid grid-cols-3 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
             <div className="h-[74px] p-3 rounded-lg border border-[var(--card-border)] bg-[var(--bg-secondary)] flex flex-col items-center justify-center gap-2">
               <Skeleton className="w-6 h-6 rounded-full" />
               <Skeleton className="h-3.5 w-16" />
@@ -44,6 +44,10 @@ export const TimelineSkeleton: React.FC = () => {
             <div className="h-[74px] p-3 rounded-lg border border-[var(--card-border)] bg-[var(--bg-secondary)] flex flex-col items-center justify-center gap-2">
               <Skeleton className="w-6 h-6 rounded-full" />
               <Skeleton className="h-3.5 w-12" />
+            </div>
+            <div className="h-[74px] p-3 rounded-lg border border-[var(--card-border)] bg-[var(--bg-secondary)] flex flex-col items-center justify-center gap-2">
+              <Skeleton className="w-6 h-6 rounded-full" />
+              <Skeleton className="h-3.5 w-14" />
             </div>
           </div>
         </div>
