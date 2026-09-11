@@ -1,6 +1,6 @@
 import { Medication } from '../types';
 
-export const APP_VERSION = '1.0.11';
+export const APP_VERSION = '1.0.12';
 
 export const COMMON_SYMPTOMS = [
   '☀️ Fotofobia (luz)',

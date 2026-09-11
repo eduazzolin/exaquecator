@@ -55,11 +55,17 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const refreshData = async () => {
+    if (!user) {
+      setCrises([]);
+      setMedications([]);
+      setDataLoading(false);
+      return;
+    }
     setDataLoading(true);
     try {
       const [fetchedCrises, fetchedMeds] = await Promise.all([
-        fetchCrisesFromStorage(user?.uid),
-        fetchMedicationsFromStorage(user?.uid)
+        fetchCrisesFromStorage(user.uid),
+        fetchMedicationsFromStorage(user.uid)
       ]);
       setCrises(fetchedCrises);
       setMedications(fetchedMeds);

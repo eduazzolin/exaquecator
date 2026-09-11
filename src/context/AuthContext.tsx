@@ -24,24 +24,15 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const DEMO_USER: UserProfile = {
-  uid: 'demo-local-user',
-  email: 'usuario.demo@enxaquecator.app',
-  displayName: 'Usuário Local (Modo Demo)',
-  isAnonymous: true
-};
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserProfile | null>(() => {
-    if (!isFirebaseConfigured) return DEMO_USER;
     const cached = localStorage.getItem('enxaquecator_auth_user');
     return cached ? JSON.parse(cached) : null;
   });
-  const [loading, setLoading] = useState<boolean>(isFirebaseConfigured);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     if (!isFirebaseConfigured || !auth) {
-      setUser(DEMO_USER);
       setLoading(false);
       return;
     }
@@ -69,7 +60,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithGoogle = async () => {
     if (!isFirebaseConfigured || !auth || !googleProvider) {
-      setUser({ ...DEMO_USER, displayName: 'Conta Google (Demo)' });
+      const demoProfile: UserProfile = {
+        uid: 'local-google-user',
+        email: 'usuario@google.local',
+        displayName: 'Conta Google (Local)',
+        isAnonymous: false
+      };
+      setUser(demoProfile);
+      localStorage.setItem('enxaquecator_auth_user', JSON.stringify(demoProfile));
       return;
     }
     await signInWithPopup(auth, googleProvider);
@@ -77,7 +75,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInWithEmail = async (email: string, pass: string) => {
     if (!isFirebaseConfigured || !auth) {
-      setUser({ ...DEMO_USER, email, displayName: email.split('@')[0] });
+      const name = email.split('@')[0] || 'Usuário';
+      const demoProfile: UserProfile = {
+        uid: `local-${email.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        email,
+        displayName: name.charAt(0).toUpperCase() + name.slice(1),
+        isAnonymous: false
+      };
+      setUser(demoProfile);
+      localStorage.setItem('enxaquecator_auth_user', JSON.stringify(demoProfile));
       return;
     }
     await signInWithEmailAndPassword(auth, email, pass);
@@ -85,7 +91,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUpWithEmail = async (email: string, pass: string) => {
     if (!isFirebaseConfigured || !auth) {
-      setUser({ ...DEMO_USER, email, displayName: email.split('@')[0] });
+      const name = email.split('@')[0] || 'Usuário';
+      const demoProfile: UserProfile = {
+        uid: `local-${email.replace(/[^a-zA-Z0-9]/g, '_')}`,
+        email,
+        displayName: name.charAt(0).toUpperCase() + name.slice(1),
+        isAnonymous: false
+      };
+      setUser(demoProfile);
+      localStorage.setItem('enxaquecator_auth_user', JSON.stringify(demoProfile));
       return;
     }
     await createUserWithEmailAndPassword(auth, email, pass);
@@ -93,7 +107,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signInAsGuest = async () => {
     if (!isFirebaseConfigured || !auth) {
-      setUser(DEMO_USER);
+      const guestProfile: UserProfile = {
+        uid: 'local-guest-user',
+        email: null,
+        displayName: 'Convidado Local',
+        isAnonymous: true
+      };
+      setUser(guestProfile);
+      localStorage.setItem('enxaquecator_auth_user', JSON.stringify(guestProfile));
       return;
     }
     await signInAnonymously(auth);

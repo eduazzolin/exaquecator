@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useAuth } from './context/AuthContext';
 import { useData } from './context/DataContext';
 import { Navbar } from './components/layout/Navbar';
 import { BottomNav } from './components/layout/BottomNav';
@@ -10,11 +11,13 @@ import { AnalyticsDashboard } from './components/analytics/AnalyticsDashboard';
 import { MedicationManager } from './components/medications/MedicationManager';
 import { ExportModal } from './components/export/ExportModal';
 import { AuthModal } from './components/auth/AuthModal';
+import { LoginView } from './components/auth/LoginView';
 import { TimelineSkeleton, AnalyticsSkeleton, MedicationSkeleton } from './components/common/Skeleton';
 import { getTodayDateString } from './utils/dateUtils';
 import { APP_VERSION } from './utils/constants';
 
 export const App: React.FC = () => {
+  const { user, loading: authLoading } = useAuth();
   const { crises, loading } = useData();
 
   const [activeTab, setActiveTab] = useState<'timeline' | 'analytics' | 'medications'>('timeline');
@@ -56,6 +59,30 @@ export const App: React.FC = () => {
     setSelectedDate(date);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  // Se estiver verificando a sessão e não houver usuário em cache
+  if (authLoading && !user) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[var(--bg-primary)] text-[var(--text-primary)] transition-colors duration-200">
+        <div className="flex flex-col items-center gap-3 animate-pulse">
+          <div className="w-12 h-12 rounded-xl border border-[var(--card-border)] flex items-center justify-center overflow-hidden shadow-sm">
+            <img src="/favicon.svg" alt="Enxaquecator Logo" className="w-full h-full object-cover" />
+          </div>
+          <p className="text-xs font-mono text-[var(--text-muted)]">Carregando Enxaquecator...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Se não estiver logado, bloqueia o sistema e renderiza a tela de login
+  if (!user) {
+    return (
+      <>
+        <ToastContainer />
+        <LoginView theme={theme} onToggleTheme={toggleTheme} />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col pb-24 sm:pb-12 transition-colors duration-200">
