@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useData } from '../../context/DataContext';
 import { MedicationTaken, ReliefLevel, CrisisType } from '../../types';
-import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor, PERIOD_OPTIONS } from '../../utils/constants';
+import { getIntensityColor, PERIOD_OPTIONS } from '../../utils/constants';
 import { formatDateFull } from '../../utils/dateUtils';
 import { TagPicker } from '../common/TagPicker';
 import { MiniDatePicker } from '../common/MiniDatePicker';
@@ -20,7 +20,17 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({
   selectedDate,
   onDateChange
 }) => {
-  const { crises, addCrisis, updateCrisis, deleteCrisis, medications } = useData();
+  const { 
+    crises, 
+    addCrisis, 
+    updateCrisis, 
+    deleteCrisis, 
+    medications,
+    symptomSuggestions,
+    triggerSuggestions,
+    addCustomSymptom,
+    addCustomTrigger
+  } = useData();
 
   const existingCrisis = crises.find(c => c.date === selectedDate);
 
@@ -425,18 +435,20 @@ export const CrisisModal: React.FC<CrisisModalProps> = ({
           <div className="space-y-3 pt-1">
             <TagPicker
               label="Sintomas"
-              options={COMMON_SYMPTOMS}
+              options={symptomSuggestions}
               selected={symptoms}
               onChange={setSymptoms}
               placeholderCustom="Outro sintoma..."
+              onAddCustom={addCustomSymptom}
             />
 
             <TagPicker
               label="Gatilhos"
-              options={COMMON_TRIGGERS}
+              options={triggerSuggestions}
               selected={triggers}
               onChange={setTriggers}
               placeholderCustom="Outro gatilho..."
+              onAddCustom={addCustomTrigger}
             />
           </div>
 

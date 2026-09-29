@@ -8,6 +8,7 @@ interface TagPickerProps {
   onChange: (selected: string[]) => void;
   placeholderCustom?: string;
   allowCustom?: boolean;
+  onAddCustom?: (tag: string) => void;
 }
 
 export const TagPicker: React.FC<TagPickerProps> = ({
@@ -16,7 +17,8 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   selected,
   onChange,
   placeholderCustom = 'Adicionar outro...',
-  allowCustom = true
+  allowCustom = true,
+  onAddCustom
 }) => {
   const [customInput, setCustomInput] = useState('');
   const [isAdding, setIsAdding] = useState(false);
@@ -35,8 +37,11 @@ export const TagPicker: React.FC<TagPickerProps> = ({
   const handleAddCustom = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     const trimmed = customInput.trim();
-    if (trimmed && !selected.includes(trimmed)) {
-      onChange([...selected, trimmed]);
+    if (trimmed) {
+      if (!selected.includes(trimmed)) {
+        onChange([...selected, trimmed]);
+      }
+      onAddCustom?.(trimmed);
       setCustomInput('');
       setIsAdding(false);
     }

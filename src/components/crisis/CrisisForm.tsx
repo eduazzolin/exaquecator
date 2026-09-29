@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useData } from '../../context/DataContext';
 import { useAuth } from '../../context/AuthContext';
 import { MedicationTaken, ReliefLevel, CrisisType, PainLocation } from '../../types';
-import { COMMON_SYMPTOMS, COMMON_TRIGGERS, getIntensityColor, PERIOD_OPTIONS } from '../../utils/constants';
+import { getIntensityColor, PERIOD_OPTIONS } from '../../utils/constants';
 import { formatDateFull } from '../../utils/dateUtils';
 import { compressImageDetails } from '../../utils/imageUtils';
 import { uploadOrStoreImage } from '../../services/imageStorageService';
@@ -20,7 +20,17 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
   selectedDate,
   onDateChange
 }) => {
-  const { crises, addCrisis, updateCrisis, deleteCrisis, medications } = useData();
+  const { 
+    crises, 
+    addCrisis, 
+    updateCrisis, 
+    deleteCrisis, 
+    medications,
+    symptomSuggestions,
+    triggerSuggestions,
+    addCustomSymptom,
+    addCustomTrigger
+  } = useData();
   const { user } = useAuth();
 
   // Find if there is an existing record for the selected date
@@ -699,10 +709,11 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
 
             <TagPicker
               label=""
-              options={COMMON_TRIGGERS}
+              options={triggerSuggestions}
               selected={triggers}
               onChange={setTriggers}
               placeholderCustom="Outro gatilho acionado..."
+              onAddCustom={addCustomTrigger}
             />
           </div>
         )}
@@ -857,18 +868,20 @@ export const CrisisForm: React.FC<CrisisFormProps> = ({
 
                 <TagPicker
                   label="Sintomas"
-                  options={COMMON_SYMPTOMS}
+                  options={symptomSuggestions}
                   selected={symptoms}
                   onChange={setSymptoms}
                   placeholderCustom="Outro sintoma..."
+                  onAddCustom={addCustomSymptom}
                 />
 
                 <TagPicker
                   label="Gatilhos"
-                  options={COMMON_TRIGGERS}
+                  options={triggerSuggestions}
                   selected={triggers}
                   onChange={setTriggers}
                   placeholderCustom="Outro gatilho..."
+                  onAddCustom={addCustomTrigger}
                 />
 
                 {/* Bloco de Fotos & Anexos dentro da seção retrátil */}

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { CrisisRecord, Medication, AppNotification } from '../types';
 import { useAuth } from './AuthContext';
 import { 
@@ -9,6 +9,14 @@ import {
   saveMedicationToStorage,
   deleteMedicationFromStorage
 } from '../services/storageService';
+import { COMMON_SYMPTOMS, COMMON_TRIGGERS } from '../utils/constants';
+import {
+  mergeTagSuggestions,
+  getStoredCustomSymptoms,
+  saveStoredCustomSymptoms,
+  getStoredCustomTriggers,
+  saveStoredCustomTriggers
+} from '../utils/tagUtils';
 
 interface DataContextType {
   crises: CrisisRecord[];
@@ -29,6 +37,12 @@ interface DataContextType {
   deleteMedication: (id: string) => Promise<void>;
   toggleMedicationFavorite: (id: string) => Promise<void>;
   
+  // Suggestions (Sintomas e Gatilhos)
+  symptomSuggestions: string[];
+  triggerSuggestions: string[];
+  addCustomSymptom: (symptom: string) => void;
+  addCustomTrigger: (trigger: string) => void;
+
   // Refresh
   refreshData: () => Promise<void>;
 }
@@ -41,6 +55,46 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [medications, setMedications] = useState<Medication[]>([]);
   const [dataLoading, setDataLoading] = useState<boolean>(true);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
+  const [customSymptoms, setCustomSymptoms] = useState<string[]>(() => getStoredCustomSymptoms());
+  const [customTriggers, setCustomTriggers] = useState<string[]>(() => getStoredCustomTriggers());
+
+  const symptomSuggestions = useMemo(() => {
+    return mergeTagSuggestions(
+      COMMON_SYMPTOMS,
+      crises.map(c => c.symptoms),
+      customSymptoms
+    );
+  }, [crises, customSymptoms]);
+
+  const triggerSuggestions = useMemo(() => {
+    return mergeTagSuggestions(
+      COMMON_TRIGGERS,
+      crises.map(c => c.triggers),
+      customTriggers
+    );
+  }, [crises, customTriggers]);
+
+  const addCustomSymptom = (tag: string) => {
+    const trimmed = tag.trim();
+    if (!trimmed) return;
+    setCustomSymptoms(prev => {
+      if (prev.some(s => s.toLowerCase() === trimmed.toLowerCase())) return prev;
+      const updated = [...prev, trimmed];
+      saveStoredCustomSymptoms(updated);
+      return updated;
+    });
+  };
+
+  const addCustomTrigger = (tag: string) => {
+    const trimmed = tag.trim();
+    if (!trimmed) return;
+    setCustomTriggers(prev => {
+      if (prev.some(t => t.toLowerCase() === trimmed.toLowerCase())) return prev;
+      const updated = [...prev, trimmed];
+      saveStoredCustomTriggers(updated);
+      return updated;
+    });
+  };
 
   const showToast = (message: string, type: AppNotification['type'] = 'success') => {
     const id = Date.now().toString();
@@ -94,6 +148,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updatedAt: now
     };
 
+    if (crisisData.symptoms) {
+      crisisData.symptoms.forEach(addCustomSymptom);
+    }
+    if (crisisData.triggers) {
+      crisisData.triggers.forEach(addCustomTrigger);
+    }
+
     const updated = [newCrisis, ...crises].sort((a, b) => b.date.localeCompare(a.date));
     setCrises(updated);
     await saveCrisisToStorage(newCrisis, user?.uid);
@@ -107,6 +168,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       ...crisis,
       updatedAt: now
     };
+
+    if (crisis.symptoms) {
+      crisis.symptoms.forEach(addCustomSymptom);
+    }
+    if (crisis.triggers) {
+      crisis.triggers.forEach(addCustomTrigger);
+    }
 
     setCrises(prev => prev.map(c => c.id === crisis.id ? updatedRecord : c).sort((a, b) => b.date.localeCompare(a.date)));
     await saveCrisisToStorage(updatedRecord, user?.uid);
@@ -172,6 +240,10 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
         updateMedication,
         deleteMedication,
         toggleMedicationFavorite,
+        symptomSuggestions,
+        triggerSuggestions,
+        addCustomSymptom,
+        addCustomTrigger,
         refreshData
       }}
     >
